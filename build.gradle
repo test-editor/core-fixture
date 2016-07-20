@@ -1,0 +1,74 @@
+plugins {
+    id 'maven-publish'
+    id 'net.researchgate.release' version '2.3.4'
+    id "com.jfrog.bintray" version "1.7"
+    id 'java-gradle-plugin'
+}
+
+repositories {
+    jcenter()
+}
+
+def actualVersion = "$version" // remapping version to this var, since version has namespace clashes in some cases (e.g. within bintray.pkg.version)
+def scmTag='v'+actualVersion
+
+group = 'org.testeditor.fixture'
+version = actualVersion
+
+jar {
+    manifest {
+        attributes 'version': actualVersion
+    }
+}
+
+// for more configuration options see https://github.com/bintray/gradle-bintray-plugin
+bintray {
+    user = System.getenv()['JCENTER_USER'] 
+    key = System.getenv()['JCENTER_PASSWD']
+    publications = ['FixturePublication'] 
+    publish = true 
+    pkg {
+        repo = 'Fixtures'
+        name = 'core-fixture'
+        userOrg = 'test-editor'
+        websiteUrl = 'http://testeditor.org'
+        licenses = ['EPL-1.0']
+        vcsUrl = 'https://github.com/test-editor/core-fixture.git'
+        version {
+            name = actualVersion
+            desc = "core fixture "+scmTag
+            released  = new Date()
+            vcsTag = scmTag
+        }
+    }    
+}
+
+publishing {
+    publications {
+        FixturePublication(MavenPublication) {
+            from components.java
+            groupId 'org.testeditor.fixture'
+            artifactId 'core-fixture'
+            version actualVersion
+        }
+    }
+}
+
+release {
+    tagTemplate = 'v${version}'
+    preTagCommitMessage = '[release] '
+    tagCommitMessage = '[release] '
+    newVersionCommitMessage = '[new version]'
+
+    scmAdapters = [
+        net.researchgate.release.GitAdapter
+    ]  
+    git {
+        requireBranch = 'master'
+        pushToRemote = 'origin'
+    }
+}
+
+dependencies {
+    afterReleaseBuild.dependsOn bintrayUpload
+}
