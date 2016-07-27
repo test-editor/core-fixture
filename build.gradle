@@ -9,15 +9,9 @@ repositories {
     jcenter()
 }
 
-def actualVersion = "$version" // remapping version to this var, since version has namespace clashes in some cases (e.g. within bintray.pkg.version)
-def scmTag='v'+actualVersion
-
-group = 'org.testeditor.fixture'
-version = actualVersion
-
 jar {
     manifest {
-        attributes 'version': actualVersion
+        attributes 'version': project.version
     }
 }
 
@@ -35,8 +29,9 @@ bintray {
         licenses = ['EPL-1.0']
         vcsUrl = 'https://github.com/test-editor/core-fixture.git'
         version {
-            name = actualVersion
-            desc = "core fixture "+scmTag
+            def scmTag="v${project.version}"
+            name = project.version
+            desc = 'core fixture '+scmTag
             released  = new Date()
             vcsTag = scmTag
         }
@@ -49,7 +44,7 @@ publishing {
             from components.java
             groupId 'org.testeditor.fixture'
             artifactId 'core-fixture'
-            version actualVersion
+            version project.version
         }
     }
 }
@@ -60,9 +55,6 @@ release {
     tagCommitMessage = '[release] '
     newVersionCommitMessage = '[new version]'
 
-    scmAdapters = [
-        net.researchgate.release.GitAdapter
-    ]  
     git {
         requireBranch = 'master'
         pushToRemote = 'origin'
