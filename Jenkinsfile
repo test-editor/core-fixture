@@ -45,10 +45,6 @@ nodeWithProperWorkspace {
 }
 
 String getCurrentVersion() {
-    Properties properties = new Properties()
-    File propertiesFile = new File('gradle.properties')
-    propertiesFile.withInputStream {
-        properties.load(it)
-    }
-    return properties."version"
+    def properties = readProperties file: 'gradle.properties'
+    return properties.version
 }
