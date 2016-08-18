@@ -1,0 +1,56 @@
+plugins {
+    id 'maven'
+    id 'java'
+    id 'com.jfrog.bintray' version '1.7.1'
+    id 'net.researchgate.release' version '2.4.0'
+}
+
+repositories {
+    jcenter()
+}
+
+group = 'org.testeditor.fixture'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+jar {
+    manifest {
+        attributes 'Implementation-Title': "${project.group}.${project.name}",
+                   'Implementation-Version': project.version
+    }
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+	classifier 'sources'
+	from sourceSets.main.allSource
+}
+
+artifacts {
+	archives sourcesJar
+}
+
+release {
+    preTagCommitMessage = '[release] '
+    tagCommitMessage = '[release] '
+    tagTemplate = 'v${version}'
+}
+
+bintray {
+    user = System.getenv('BINTRAY_USER')
+    key = System.getenv('BINTRAY_KEY')
+    configurations = ['archives']
+    publish = true 
+    pkg {
+        repo = 'maven'
+        name = project.name
+        userOrg = 'test-editor'
+        websiteUrl = 'http://testeditor.org'
+        vcsUrl = "https://github.com/test-editor/${project.name}.git"
+        licenses = ['EPL-1.0']
+        version {
+            name = project.version
+            vcsTag = "v$project.version"
+        }
+    }
+}
