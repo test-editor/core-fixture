@@ -1,66 +1,56 @@
 plugins {
-    id 'maven-publish'
-    id 'net.researchgate.release' version '2.3.4'
-    id "com.jfrog.bintray" version "1.7"
-    id 'java-gradle-plugin'
+    id 'maven'
+    id 'java'
+    id 'com.jfrog.bintray' version '1.7.1'
+    id 'net.researchgate.release' version '2.4.0'
 }
 
 repositories {
     jcenter()
 }
 
+group = 'org.testeditor.fixture'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
 jar {
     manifest {
-        attributes 'version': project.version
+        attributes 'Implementation-Title': "${project.group}.${project.name}",
+                   'Implementation-Version': project.version
     }
 }
 
-// for more configuration options see https://github.com/bintray/gradle-bintray-plugin
-bintray {
-    user = System.getenv()['JCENTER_USER'] 
-    key = System.getenv()['JCENTER_PASSWD']
-    publications = ['FixturePublication'] 
-    publish = true 
-    pkg {
-        repo = 'Fixtures'
-        name = 'core-fixture'
-        userOrg = 'test-editor'
-        websiteUrl = 'http://testeditor.org'
-        licenses = ['EPL-1.0']
-        vcsUrl = 'https://github.com/test-editor/core-fixture.git'
-        version {
-            def scmTag="v${project.version}"
-            name = project.version
-            desc = 'core fixture '+scmTag
-            released  = new Date()
-            vcsTag = scmTag
-        }
-    }    
+task sourcesJar(type: Jar, dependsOn: classes) {
+	classifier 'sources'
+	from sourceSets.main.allSource
 }
 
-publishing {
-    publications {
-        FixturePublication(MavenPublication) {
-            from components.java
-            groupId 'org.testeditor.fixture'
-            artifactId 'core-fixture'
-            version project.version
-        }
-    }
+artifacts {
+	archives sourcesJar
 }
 
 release {
-    tagTemplate = 'v${version}'
     preTagCommitMessage = '[release] '
     tagCommitMessage = '[release] '
-    newVersionCommitMessage = '[new version]'
-
-    git {
-        requireBranch = 'master'
-        pushToRemote = 'origin'
-    }
+    tagTemplate = 'v${version}'
 }
 
-dependencies {
-    afterReleaseBuild.dependsOn bintrayUpload
+bintray {
+    user = System.getenv('BINTRAY_USER')
+    key = System.getenv('BINTRAY_KEY')
+    configurations = ['archives']
+    publish = true 
+    pkg {
+        repo = 'maven'
+        name = project.name
+        userOrg = 'test-editor'
+        websiteUrl = 'http://testeditor.org'
+        vcsUrl = "https://github.com/test-editor/${project.name}.git"
+        licenses = ['EPL-1.0']
+        version {
+            name = project.version
+            vcsTag = "v$project.version"
+        }
+    }
 }
