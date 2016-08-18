@@ -23,19 +23,14 @@ nodeWithProperWorkspace {
 
     if (isMaster()) {
         stage 'Release'
+        currentBuild.displayName = getVersion().replaceAll('-SNAPSHOT', '')
         withGradleEnv {
             sh 'git config user.email "jenkins@ci.testeditor.org"'
             sh 'git config user.name "jenkins"' // used for recursion detection (see 'lastCommitFromJenkins()') 
             // workaround: cannot push without credentials using HTTPS => push using SSH
             sh "git remote set-url origin ${getGithubUrlAsSsh()}"
-            gradle 'release -Prelease.useAutomaticVersion=true'
-        }
-        currentBuild.displayName = getCurrentVersion()
-        
-        stage 'Publish'
-        withGradleEnv {
             withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: '1e68e4c1-48a6-428c-8896-42511359493e', passwordVariable: 'BINTRAY_KEY', usernameVariable: 'BINTRAY_USER']]) {
-                gradle 'bintrayUpload'
+                gradle 'release -Prelease.useAutomaticVersion=true'
             }
         }
         
@@ -44,7 +39,7 @@ nodeWithProperWorkspace {
 
 }
 
-String getCurrentVersion() {
+String getVersion() {
     def properties = readProperties file: 'gradle.properties'
     return properties.version
 }
