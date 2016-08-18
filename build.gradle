@@ -31,8 +31,9 @@ artifacts {
 }
 
 release {
-    preTagCommitMessage = '[release] '
-    tagCommitMessage = '[release] '
+    preTagCommitMessage = '[release]'
+    tagCommitMessage = '[release]'
+    newVersionCommitMessage = '[release] new version'
     tagTemplate = 'v${version}'
 }
 
