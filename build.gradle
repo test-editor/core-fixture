@@ -14,6 +14,14 @@ group = 'org.testeditor.fixture'
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
+dependencies {
+	compile 'org.slf4j:slf4j-api:1.7.18'
+	compile 'org.apache.logging.log4j:log4j-core:2.5'
+	compile 'org.apache.logging.log4j:log4j-api:2.5'
+	compile 'org.apache.logging.log4j:log4j-slf4j-impl:2.5'
+	compile 'junit:junit:4.12'
+}
+
 jar {
     manifest {
         attributes 'Implementation-Title': "${project.group}.${project.name}",
@@ -28,6 +36,12 @@ task sourcesJar(type: Jar, dependsOn: classes) {
 
 artifacts {
 	archives sourcesJar
+}
+
+install {
+    repositories.mavenInstaller {
+    	pom.packaging = 'jar'
+    }
 }
 
 release {
