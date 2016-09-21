@@ -12,6 +12,9 @@
  *******************************************************************************/
 package org.testeditor.fixture.core;
 
+import java.util.concurrent.TimeUnit;
+
+import org.junit.After;
 import org.junit.Before;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,12 +23,24 @@ import org.slf4j.MDC;
 public class AbstractTestCase {
 
 	protected static final Logger logger = LoggerFactory.getLogger(AbstractTestCase.class);
+	private long start;
 
 	@Before
 	public void initTestLaunch() {
 		MDC.put("TestName", this.getClass().getSimpleName());
-		logger.info("*****************************");
-		logger.info("Running test for ()", this.getClass().getName());
+		logger.info("****************************************************");
+		logger.info("Running test for {}", this.getClass().getName());
+		start = System.currentTimeMillis();
+		logger.info("****************************************************");
+	}
+
+	@After
+	public void finishtestLaunch() {
+		MDC.remove("TestName");
+		logger.info("****************************************************");
+		logger.info("Test {} finished with {} sec. duration.", this.getClass().getSimpleName(),
+				TimeUnit.SECONDS.convert(System.currentTimeMillis() - start, TimeUnit.MILLISECONDS));
+		logger.info("****************************************************");
 	}
 
 }
