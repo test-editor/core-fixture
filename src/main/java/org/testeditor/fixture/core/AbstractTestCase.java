@@ -16,10 +16,12 @@ import java.util.concurrent.TimeUnit;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
+@RunWith(TestEditorRunner.class)
 public class AbstractTestCase {
 
 	protected static final Logger logger = LoggerFactory.getLogger(AbstractTestCase.class);
