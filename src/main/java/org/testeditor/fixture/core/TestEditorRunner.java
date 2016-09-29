@@ -21,6 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.internal.runners.model.EachTestNotifier;
 import org.junit.runner.Description;
@@ -34,6 +35,7 @@ public class TestEditorRunner extends ParentRunner<FrameworkMethod> {
 
 	private final ConcurrentHashMap<FrameworkMethod, Description> methodDescriptions = new ConcurrentHashMap<FrameworkMethod, Description>();
 	private Object tclTest;
+	private FrameworkMethod lastTestStep;
 
 	public TestEditorRunner(Class<?> testClass) throws InitializationError {
 		super(testClass);
@@ -45,6 +47,7 @@ public class TestEditorRunner extends ParentRunner<FrameworkMethod> {
 				m -> Arrays.stream(m.getAnnotations()).anyMatch(a -> a.annotationType().equals(TestStepMethod.class)));
 		List<FrameworkMethod> result = methods.map(m -> new FrameworkMethod(m)).collect(Collectors.toList());
 		result.sort(getComparator());
+		lastTestStep = result.get(result.size() - 1);
 		return result;
 	}
 
@@ -83,9 +86,10 @@ public class TestEditorRunner extends ParentRunner<FrameworkMethod> {
 			eachNotifier.fireTestStarted();
 			child.invokeExplosively(tclTest);
 			eachNotifier.fireTestFinished();
-			// List<FrameworkMethod> afterMethods =
-			// getTestClass().getAnnotatedMethods(After.class);
-			// invodeSurroundingMethods(afterMethods, tclTest);
+			if (child == lastTestStep) {
+				List<FrameworkMethod> afterMethods = getTestClass().getAnnotatedMethods(After.class);
+				invodeSurroundingMethods(afterMethods, tclTest);
+			}
 		} catch (Throwable e) {
 			e.printStackTrace();
 			notifier.fireTestFailure(new Failure(description, e));
