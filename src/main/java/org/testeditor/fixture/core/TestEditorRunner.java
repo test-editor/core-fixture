@@ -15,7 +15,6 @@ package org.testeditor.fixture.core;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -46,20 +45,10 @@ public class TestEditorRunner extends ParentRunner<FrameworkMethod> {
 		Stream<Method> methods = Arrays.stream(getTestClass().getJavaClass().getMethods()).filter(
 				m -> Arrays.stream(m.getAnnotations()).anyMatch(a -> a.annotationType().equals(TestStepMethod.class)));
 		List<FrameworkMethod> result = methods.map(m -> new FrameworkMethod(m)).collect(Collectors.toList());
-		result.sort(getComparator());
+		result.sort((fm1, fm2) -> Integer.parseInt(fm1.getAnnotation(TestStepMethod.class).value()[0])
+				- Integer.parseInt(fm2.getAnnotation(TestStepMethod.class).value()[0]));
 		lastTestStep = result.get(result.size() - 1);
 		return result;
-	}
-
-	private Comparator<? super FrameworkMethod> getComparator() {
-		return new Comparator<FrameworkMethod>() {
-
-			@Override
-			public int compare(FrameworkMethod o1, FrameworkMethod o2) {
-				return Integer.parseInt(o1.getAnnotation(TestStepMethod.class).value()[0])
-						- Integer.parseInt(o2.getAnnotation(TestStepMethod.class).value()[0]);
-			}
-		};
 	}
 
 	@Override
@@ -86,13 +75,17 @@ public class TestEditorRunner extends ParentRunner<FrameworkMethod> {
 			eachNotifier.fireTestStarted();
 			child.invokeExplosively(tclTest);
 			eachNotifier.fireTestFinished();
-			if (child == lastTestStep) {
-				List<FrameworkMethod> afterMethods = getTestClass().getAnnotatedMethods(After.class);
-				invodeSurroundingMethods(afterMethods, tclTest);
-			}
 		} catch (Throwable e) {
 			e.printStackTrace();
 			notifier.fireTestFailure(new Failure(description, e));
+		}
+		if (child == lastTestStep) {
+			List<FrameworkMethod> afterMethods = getTestClass().getAnnotatedMethods(After.class);
+			try {
+				invodeSurroundingMethods(afterMethods, tclTest);
+			} catch (Throwable e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
