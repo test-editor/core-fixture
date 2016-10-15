@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 - 2015 Signal Iduna Corporation and others.
+ * Copyright (c) 2012 - 2016 Signal Iduna Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,12 +16,10 @@ import java.util.concurrent.TimeUnit;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
-@RunWith(TestEditorRunner.class)
 public class AbstractTestCase {
 
 	protected static final Logger logger = LoggerFactory.getLogger(AbstractTestCase.class);
@@ -29,7 +27,7 @@ public class AbstractTestCase {
 
 	@Before
 	public void initTestLaunch() {
-		MDC.put("TestName", this.getClass().getSimpleName());
+		MDC.put("TestName", "TE-Test: " + this.getClass().getSimpleName());
 		logger.info("****************************************************");
 		logger.info("Running test for {}", this.getClass().getName());
 		start = System.currentTimeMillis();
