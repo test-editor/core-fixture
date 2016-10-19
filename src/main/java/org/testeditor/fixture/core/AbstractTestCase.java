@@ -12,35 +12,28 @@
  *******************************************************************************/
 package org.testeditor.fixture.core;
 
-import java.util.concurrent.TimeUnit;
-
 import org.junit.After;
 import org.junit.Before;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+import org.testeditor.fixture.core.TestRunReporter.SemanticUnit;
 
 public class AbstractTestCase {
 
-	protected static final Logger logger = LoggerFactory.getLogger(AbstractTestCase.class);
-	private long start;
+	protected TestRunReporter reporter = new DefaultTestRunReporter();
+	private TestRunListener logListener = new DefaultLoggingListener();
 
 	@Before
 	public void initTestLaunch() {
-		MDC.put("TestName", "TE-Test: " + this.getClass().getSimpleName());
-		logger.info("****************************************************");
-		logger.info("Running test for {}", this.getClass().getName());
-		start = System.currentTimeMillis();
-		logger.info("****************************************************");
+		MDC.put("TestName", "TE-Test: " + getClass().getSimpleName());
+		reporter.addListener(logListener);
+		reporter.enter(SemanticUnit.TEST, getClass().getName());
 	}
 
 	@After
 	public void finishtestLaunch() {
+		reporter.leave(SemanticUnit.TEST);
+		reporter.removeListener(logListener);
 		MDC.remove("TestName");
-		logger.info("****************************************************");
-		logger.info("Test {} finished with {} sec. duration.", this.getClass().getSimpleName(),
-				TimeUnit.SECONDS.convert(System.currentTimeMillis() - start, TimeUnit.MILLISECONDS));
-		logger.info("****************************************************");
 	}
 
 }
