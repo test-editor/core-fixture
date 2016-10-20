@@ -59,7 +59,7 @@ bintray {
     configurations = ['archives']
     publish = true 
     pkg {
-        repo = 'maven'
+        repo = 'Fixtures'
         name = project.name
         userOrg = 'test-editor'
         websiteUrl = 'http://testeditor.org'
