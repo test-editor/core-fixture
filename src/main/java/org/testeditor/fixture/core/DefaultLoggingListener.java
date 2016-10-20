@@ -1,3 +1,15 @@
+/*******************************************************************************
+ * Copyright (c) 2012 - 2016 Signal Iduna Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ * Signal Iduna Corporation - initial API and implementation
+ * akquinet AG
+ * itemis AG
+ *******************************************************************************/
 package org.testeditor.fixture.core;
 
 import java.util.concurrent.TimeUnit;
@@ -36,7 +48,6 @@ public class DefaultLoggingListener implements TestRunListener {
 			logger.error("Unknown semantic test unit='{}' encountered during logging through class='{}'.", unit, getClass().getName());
 			break;
 		}
-
 	}
 
 	private void logTest(Position position, String message) {
@@ -58,7 +69,7 @@ public class DefaultLoggingListener implements TestRunListener {
 			break;
 		}
 	}
-
+	
 	private void logSpecification(Position position, String message) {
 		if (position == Position.ENTER) {
 			logger.info(" [Test spec] * {}", message);

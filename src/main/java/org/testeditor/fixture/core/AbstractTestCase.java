@@ -17,15 +17,25 @@ import org.junit.Before;
 import org.slf4j.MDC;
 import org.testeditor.fixture.core.TestRunReporter.SemanticUnit;
 
+/**
+ * Class from which all generated unit tests are (transitively) derived
+ */
 public class AbstractTestCase {
 
-	protected TestRunReporter reporter = new DefaultTestRunReporter();
-	private TestRunListener logListener = new DefaultLoggingListener();
+	protected final TestRunReporter reporter;
+	private final TestRunListener logListener;
+	
+	public AbstractTestCase() {
+		// initialization is done in ctor to allow other ctors to access reporter
+		// to allow registration before the first event is reported (ENTER TEST)
+		reporter=createTestRunReporter();
+		logListener=createLoggingListener();
+	}
 
 	@Before
 	public void initTestLaunch() {
 		MDC.put("TestName", "TE-Test: " + getClass().getSimpleName());
-		reporter.addListener(logListener);
+		reporter.addListener(logListener); // listen to all events!
 		reporter.enter(SemanticUnit.TEST, getClass().getName());
 	}
 
@@ -34,6 +44,16 @@ public class AbstractTestCase {
 		reporter.leave(SemanticUnit.TEST);
 		reporter.removeListener(logListener);
 		MDC.remove("TestName");
+	}
+	
+	// may be overridden to provide alternate implementations of the test run reporter
+	protected TestRunReporter createTestRunReporter() {
+		return new DefaultTestRunReporter();
+	}
+	
+	// may be overriden to provide alternate implementation of the logging listener
+	protected TestRunListener createLoggingListener() {
+		return new DefaultLoggingListener();
 	}
 
 }
