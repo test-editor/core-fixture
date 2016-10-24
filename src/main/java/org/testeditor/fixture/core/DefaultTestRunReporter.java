@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 /**
  * Implementation that automatically executes leave when entering equal level or
@@ -29,6 +30,9 @@ import org.slf4j.LoggerFactory;
 public class DefaultTestRunReporter implements TestRunReporter {
 
 	protected static final Logger logger = LoggerFactory.getLogger(AbstractTestCase.class);
+	
+	// logger (implemented as listener) is always reported on before all other listeners!
+	private final TestRunListener logListener = new DefaultLoggingListener();
 
 	// per semantic unit only one may be active
 	private Map<SemanticUnit, String> enteredUnits = new LinkedHashMap<SemanticUnit, String>();
@@ -39,6 +43,10 @@ public class DefaultTestRunReporter implements TestRunReporter {
 	public void enter(SemanticUnit unit, String msg) {
 		if (enteredUnits.containsKey(unit)) {
 			leave(unit); // must leave before entering a new one
+		}
+		
+		if(unit==SemanticUnit.TEST){
+			MDC.put("TestName", "TE-Test: " + msg.replaceAll("^.*\\.",""));
 		}
 
 		informListeners(unit, Action.ENTER, msg);
@@ -55,6 +63,10 @@ public class DefaultTestRunReporter implements TestRunReporter {
 		for (SemanticUnit unitToLeave : enteredSortedUnitsOfEqualOrHigherOrder(unit)) {
 			informListeners(unitToLeave, Action.LEAVE, enteredUnits.get(unitToLeave));
 			enteredUnits.remove(unitToLeave);
+		}
+
+		if(unit==SemanticUnit.TEST){
+			MDC.remove("TestName");
 		}
 	}
 
@@ -74,6 +86,7 @@ public class DefaultTestRunReporter implements TestRunReporter {
 	 * guaranteed
 	 */
 	private void informListeners(SemanticUnit unit, Action action, String msg) {
+		logListener.reported(unit, action, msg); // logListener is always reported to first!
 		for (TestRunListener listener : listeners) {
 			try { // make sure that an exception is handled gracefully, so that
 					// other listeners are informed, too
