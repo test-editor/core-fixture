@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testeditor.fixture.core.TestRunReporter.Position;
+import org.testeditor.fixture.core.TestRunReporter.Action;
 import org.testeditor.fixture.core.TestRunReporter.SemanticUnit;
 
 /**
@@ -30,19 +30,19 @@ public class DefaultLoggingListener implements TestRunListener {
 	private long start;
 
 	@Override
-	public void reported(SemanticUnit unit, Position position, String message) {
+	public void reported(SemanticUnit unit, Action action, String message) {
 		switch (unit) {
 		case TEST:
-			logTest(position, message);
+			logTest(action, message);
 			break;
-		case SPECIFICATION:
-			logSpecification(position, message);
+		case SPECIFICATION_STEP:
+			logSpecification(action, message);
 			break;
 		case COMPONENT:
-			logComponent(position, message);
+			logComponent(action, message);
 			break;
 		case STEP:
-			logStep(position, message);
+			logStep(action, message);
 			break;
 		default:
 			logger.error("Unknown semantic test unit='{}' encountered during logging through class='{}'.", unit, getClass().getName());
@@ -50,41 +50,41 @@ public class DefaultLoggingListener implements TestRunListener {
 		}
 	}
 
-	private void logTest(Position position, String message) {
-		switch (position) {
+	private void logTest(Action action, String message) {
+		switch (action) {
 		case ENTER:
 			logger.info("****************************************************");
 			logger.info("Running test for {}", message);
-			start = System.currentTimeMillis();
+			start = System.nanoTime();
 			logger.info("****************************************************");
 			break;
 		case LEAVE:
 			logger.info("****************************************************");
 			logger.info("Test {} finished with {} sec. duration.", message,
-					TimeUnit.SECONDS.convert(System.currentTimeMillis() - start, TimeUnit.MILLISECONDS));
+					TimeUnit.SECONDS.convert(System.nanoTime() - start, TimeUnit.NANOSECONDS));
 			logger.info("****************************************************");
 			break;
 		default:
-			logger.error("Unknown test position='{}' encountered during logging through class='{}'.", position, getClass().getName());
+			logger.error("Unknown test action='{}' encountered during logging through class='{}'.", action, getClass().getName());
 			break;
 		}
 	}
 	
-	private void logSpecification(Position position, String message) {
-		if (position == Position.ENTER) {
-			logger.info(" [Test spec] * {}", message);
+	private void logSpecification(Action action, String message) {
+		if (action == Action.ENTER) {
+			logger.info(" [Spec step] * {}", message);
 		}
 	}
 
-	private void logComponent(Position position, String message) {
-		if (position == Position.ENTER) {
-			logger.trace(" [Component] {}:", message);
+	private void logComponent(Action action, String message) {
+		if (action == Action.ENTER) {
+			logger.trace(" [Component] ** {}:", message);
 		}
 	}
 
-	private void logStep(Position position, String message) {
-		if (position == Position.ENTER) {
-			logger.trace(" [Test step] - {}", message);
+	private void logStep(Action action, String message) {
+		if (action == Action.ENTER) {
+			logger.trace(" [Test step] *** {}", message);
 		}
 	}
 
