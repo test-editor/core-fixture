@@ -20,6 +20,8 @@ dependencies {
 	compile 'org.apache.logging.log4j:log4j-api:2.5'
 	compile 'org.apache.logging.log4j:log4j-slf4j-impl:2.5'
 	compile 'junit:junit:4.12'
+	compile 'org.apache.commons:commons-lang3:3.4'
+	testCompile 'org.mockito:mockito-all:1.10.19'
 }
 
 jar {
@@ -59,7 +61,7 @@ bintray {
     configurations = ['archives']
     publish = true 
     pkg {
-        repo = 'maven'
+        repo = 'Fixtures'
         name = project.name
         userOrg = 'test-editor'
         websiteUrl = 'http://testeditor.org'
