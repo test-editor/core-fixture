@@ -20,8 +20,26 @@ package org.testeditor.fixture.core;
  */
 public interface TestRunReporter {
 	enum SemanticUnit {
-		TEST, SPECIFICATION_STEP, COMPONENT, STEP
-	}; // order is relevant!
+		TEST(4), SPECIFICATION_STEP(3), COMPONENT(2), STEP(1);
+
+		private final int rank; // internal, never to be used outside this enum
+
+		private SemanticUnit(final int rank) {
+			this.rank = rank;
+		}
+
+		/**
+		 * compare two SemanticUnit ranks
+		 * 
+		 * @return < 0 if other is of lower rank<br/>
+		 *         0 if both are of equal rank<br/>
+		 *         > 0 if other is of higher rank<br/>
+		 */
+		public int compareRank(SemanticUnit other) {
+			return rank - other.rank;
+		}
+
+	};
 
 	enum Action {
 		ENTER, LEAVE
