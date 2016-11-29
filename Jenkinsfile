@@ -1,20 +1,24 @@
 #!groovy
 nodeWithProperWorkspace {
-    stage('checkout') {
-        checkout scm
 
+    stage('Checkout') {
+        checkout scm
         if (isMaster()) {
-            if (lastCommitFromJenkins()) {
-                // Workaround: we don't want infinite releases.
-                echo "Aborting build as the current commit on master is already released."
-                return
-            }
             // git by default checks out detached, we need a local branch
             sh "git checkout $env.BRANCH_NAME" // workaround for https://issues.jenkins-ci.org/browse/JENKINS-31924
             sh 'git fetch --prune origin +refs/tags/*:refs/tags/*' // delete all local tags
             sh "git reset --hard origin/master"
-        } 
-        sh "git clean -ffdx"
+            sh "git clean -ffdx"
+        } else {
+            sh "git clean -ffd"
+        }
+    }
+
+    if (isMaster() && isVersionTag()) {
+        // Workaround: we don't want infinite releases.
+        echo "Aborting build as the current commit on master is already tagged."
+        currentBuild.displayName = "checkout-only"
+        return
     }
 
     stage('Build') {
