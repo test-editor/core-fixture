@@ -40,7 +40,7 @@ nodeWithProperWorkspace {
             currentBuild.displayName = getVersion().replaceAll('-SNAPSHOT', '')
             withGradleEnv {
                 sh 'git config user.email "jenkins@ci.testeditor.org"'
-                sh 'git config user.name "jenkins"' // used for recursion detection (see 'lastCommitFromJenkins()') 
+                sh 'git config user.name "jenkins"'
                 // workaround: cannot push without credentials using HTTPS => push using SSH
                 sh "git remote set-url origin ${getGithubUrlAsSsh()}"
                 withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: '1e68e4c1-48a6-428c-8896-42511359493e', passwordVariable: 'BINTRAY_KEY', usernameVariable: 'BINTRAY_USER']]) {
