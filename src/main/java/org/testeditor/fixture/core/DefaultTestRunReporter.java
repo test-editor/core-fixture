@@ -23,8 +23,8 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 /**
- * Implementation that automatically executes leave when entering equal level or
- * higher level ordinal of SemanticUnit (see
+ * Implementation that automatically executes leave when entering equal or
+ * higher rank of SemanticUnit (see
  * TestDefaultTestRunReport.testSemanticUnitLeaveMultipleLevel)
  */
 public class DefaultTestRunReporter implements TestRunReporter {
@@ -44,9 +44,9 @@ public class DefaultTestRunReporter implements TestRunReporter {
 		if (enteredUnits.containsKey(unit)) {
 			leave(unit); // must leave before entering a new one
 		}
-		
-		if(unit==SemanticUnit.TEST){
-			MDC.put("TestName", "TE-Test: " + msg.replaceAll("^.*\\.",""));
+
+		if (unit == SemanticUnit.TEST) {
+			MDC.put("TestName", "TE-Test: " + msg.replaceAll("^.*\\.", ""));
 		}
 
 		informListeners(unit, Action.ENTER, msg);
@@ -54,30 +54,30 @@ public class DefaultTestRunReporter implements TestRunReporter {
 	}
 
 	/**
-	 * when leaving this unit, make sure that all lower level semantic units
+	 * when leaving this unit, make sure that all lower ranked semantic units
 	 * that were entered are left, too => when leaving SemanticUnit.TEST
-	 * (highest level), all other entered units are left!
+	 * (highest rank), all other entered units are left!
 	 */
 	@Override
 	public void leave(SemanticUnit unit) {
-		for (SemanticUnit unitToLeave : enteredSortedUnitsOfEqualOrHigherOrder(unit)) {
+		for (SemanticUnit unitToLeave : enteredSortedUnitsOfLowerOrEqualRank(unit)) {
 			informListeners(unitToLeave, Action.LEAVE, enteredUnits.get(unitToLeave));
 			enteredUnits.remove(unitToLeave);
 		}
 
-		if(unit==SemanticUnit.TEST){
+		if (unit == SemanticUnit.TEST) {
 			MDC.remove("TestName");
 		}
 	}
 
 	/**
-	 * return a reverse sorted list of SemanticUnits that were entered of equal
-	 * or higher ordinal
+	 * return a reverse rank sorted list (lowest rank first) of SemanticUnits
+	 * that were entered of lower or equal rank
 	 */
-	private List<SemanticUnit> enteredSortedUnitsOfEqualOrHigherOrder(SemanticUnit unit) {
+	private List<SemanticUnit> enteredSortedUnitsOfLowerOrEqualRank(SemanticUnit unit) {
 		return enteredUnits.keySet().stream() //
-				.sorted((u1, u2) -> Integer.compare(u2.ordinal(), u1.ordinal())) // reverse
-				.filter((u) -> u.ordinal() >= unit.ordinal()) // only >= ordinal
+				.sorted((u1, u2) -> u1.compareRank(u2)) //
+				.filter((u) -> u.compareRank(unit) <= 0) //
 				.collect(Collectors.toList());
 	}
 
@@ -97,7 +97,6 @@ public class DefaultTestRunReporter implements TestRunReporter {
 			}
 		}
 	}
-
 
 	@Override
 	public void addListener(TestRunListener listener) {
