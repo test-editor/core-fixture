@@ -2,7 +2,7 @@ core-fixture
 ============
 
 [![License](http://img.shields.io/badge/license-EPL-blue.svg?style=flat)](https://www.eclipse.org/legal/epl-v10.html)
-[![Build Status](https://travis-ci.org/test-editor/core-fixture.svg?branch=develop)](https://travis-ci.org/test-editor/core-fixture)
+[![Build Status](https://travis-ci.org/test-editor/core-fixture.svg?branch=master)](https://travis-ci.org/test-editor/core-fixture)
 [![Download](https://api.bintray.com/packages/test-editor/Fixtures/core-fixture/images/download.svg)](https://bintray.com/test-editor/Fixtures/core-fixture/_latestVersion)
 
 A core fixture will be used by a concrete test driver like e.g. web-fixture.
