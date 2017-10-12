@@ -5,18 +5,14 @@ import java.util.regex.Pattern;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
 
 public class TestMasking {
 
 	StringMasker loggingMasker; // class under test
 
-	@Mock
-	TestRunListener delegate;
-
 	@Before
 	public void setupClassUnderTest() {
-		loggingMasker = new DefaultLoggingMessageMasker(delegate);
+		loggingMasker = new DefaultStringMasker();
 	}
 
 	@Test

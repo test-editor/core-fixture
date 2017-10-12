@@ -5,22 +5,9 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.testeditor.fixture.core.TestRunReporter.Action;
-import org.testeditor.fixture.core.TestRunReporter.SemanticUnit;
+public class DefaultStringMasker implements StringMasker {
 
-public class DefaultLoggingMessageMasker implements TestRunListener, StringMasker {
-
-	private TestRunListener delegate;
 	private List<Pattern> patterns = new LinkedList<>();
-
-	public DefaultLoggingMessageMasker(TestRunListener wrappedLoggingListener) {
-		this.delegate = wrappedLoggingListener;
-	}
-
-	@Override
-	public void reported(SemanticUnit unit, Action action, String message) {
-		this.delegate.reported(unit, action, mask(message));
-	}
 
 	@Override
 	public String mask(String unmasked) {
@@ -58,7 +45,8 @@ public class DefaultLoggingMessageMasker implements TestRunListener, StringMaske
 	@Override
 	public void registerMaskPattern(Pattern pattern) {
 		if (pattern.matcher("").groupCount() != 1) {
-			throw new RuntimeException("Pattern must contain exactly one capturing group (see https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html#cg)");
+			throw new RuntimeException(
+					"Pattern must contain exactly one capturing group (see https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html#cg)");
 		}
 		this.patterns.add(pattern);
 	}
