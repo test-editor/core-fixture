@@ -126,4 +126,9 @@ public class DefaultTestRunReporter implements TestRunReporter {
 		this.stringMaskerDelegate.unregisterMaskPattern(pattern);
 	}
 
+	@Override
+	public Logger buildMaskingLogger(Logger logger) {
+		return new DefaultMaskingLogger(logger, this);
+	}
+
 }

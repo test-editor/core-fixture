@@ -12,6 +12,8 @@
  *******************************************************************************/
 package org.testeditor.fixture.core;
 
+import org.slf4j.Logger;
+
 /**
  * Used for reporting actions during test execution. Each action can be
  * described unambiguously by a combination of SemanticUnit x Action x Message
@@ -44,7 +46,14 @@ public interface TestRunReporter extends StringMasker {
 	enum Action {
 		ENTER, LEAVE
 	};
-
+	
+	/**
+	 * Get an slf4j logger masking messages (if applicable)
+	 * @param logger
+	 * @return
+	 */
+	Logger buildMaskingLogger(Logger logger);
+	
 	/**
 	 * called by test execution to indicate that unit x Action.ENTER x msg is
 	 * executed

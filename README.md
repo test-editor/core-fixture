@@ -20,3 +20,28 @@ In order to create a release switch to the `master` branch and execute
     ./gradlew release
 
 and enter the new version. After the commit and tag is pushed Travis will automatically build and deploy the tagged version to Bintray.
+
+
+## Usage (for fixture authors)
+
+### Example of using the `reporter`
+
+The generated unit tests using the core-fixture is automatically of the form (or similar to):
+
+``` java
+public class GreetingTest extends AbstractTestCase {
+  private SomeFixture someFixture = new SomeFixture();
+  
+  @Test
+  public void execute() throws Exception {
+    someFixture.initWithReporter(reporter); // SomeFixture must implement TestRunReportable, else this line is missing!
+    // ...
+  }
+}
+```
+
+If `SomeFixture` implements the interface `TestRunReportable`, it will automatically be initialized with the `reporter` for this test run. The `reporter` being of type `TestRunReporter` provides a method `buildMaskingLogger` that returns an `org.slf4j.Logger` masking all messages before delegating it to the logger that is passed to `buildMaskingLogger`.
+
+Additional masks can be registered (via `reporter.registerMaskPattern`) and unregistered again (via `reporter.unregisterMaskPattern`).
+
+

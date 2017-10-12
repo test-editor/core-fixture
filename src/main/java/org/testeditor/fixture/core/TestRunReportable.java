@@ -17,6 +17,9 @@ package org.testeditor.fixture.core;
  * will have a chance before actually being called to get hold of the instance of the TestRunReporter that is used 
  * to be able to register listeners (see SWTFixture).
  * 
+ * The TestRunReporter can also be used to register masking patterns. It can be used additionaly to report (log) 
+ * messages that are automatically masked
+ * 
  * The test generator will generate a constructor which will call this method on all instance variables of this class
  * that implement this interface.
  */
