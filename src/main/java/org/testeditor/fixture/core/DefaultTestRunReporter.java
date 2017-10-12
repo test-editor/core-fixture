@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -33,6 +34,7 @@ public class DefaultTestRunReporter implements TestRunReporter {
 	
 	// logger (implemented as listener) is always reported on before all other listeners!
 	private final TestRunListener logListener = new DefaultLoggingListener();
+    private final StringMasker stringMaskerDelegate = new DefaultStringMasker();
 
 	// per semantic unit only one may be active
 	private Map<SemanticUnit, String> enteredUnits = new LinkedHashMap<SemanticUnit, String>();
@@ -41,16 +43,17 @@ public class DefaultTestRunReporter implements TestRunReporter {
 
 	@Override
 	public void enter(SemanticUnit unit, String msg) {
+		String maskedMessage = mask(msg);
 		if (enteredUnits.containsKey(unit)) {
 			leave(unit); // must leave before entering a new one
 		}
 
 		if (unit == SemanticUnit.TEST) {
-			MDC.put("TestName", "TE-Test: " + msg.replaceAll("^.*\\.", ""));
+			MDC.put("TestName", "TE-Test: " + maskedMessage.replaceAll("^.*\\.", ""));
 		}
 
-		informListeners(unit, Action.ENTER, msg);
-		enteredUnits.put(unit, msg);
+		informListeners(unit, Action.ENTER, maskedMessage);
+		enteredUnits.put(unit, maskedMessage);
 	}
 
 	/**
@@ -61,7 +64,7 @@ public class DefaultTestRunReporter implements TestRunReporter {
 	@Override
 	public void leave(SemanticUnit unit) {
 		for (SemanticUnit unitToLeave : enteredSortedUnitsOfLowerOrEqualRank(unit)) {
-			informListeners(unitToLeave, Action.LEAVE, enteredUnits.get(unitToLeave));
+			informListeners(unitToLeave, Action.LEAVE, mask(enteredUnits.get(unitToLeave)));
 			enteredUnits.remove(unitToLeave);
 		}
 
@@ -83,17 +86,17 @@ public class DefaultTestRunReporter implements TestRunReporter {
 
 	/**
 	 * make sure that all registered listeners are informed, order is not
-	 * guaranteed
+	 * guaranteed. message must be masked!
 	 */
-	private void informListeners(SemanticUnit unit, Action action, String msg) {
-		logListener.reported(unit, action, msg); // logListener is always reported to first!
+	private void informListeners(SemanticUnit unit, Action action, String maskedMessage) {
+		logListener.reported(unit, action, maskedMessage); // logListener is always reported to first!
 		for (TestRunListener listener : listeners) {
 			try { // make sure that an exception is handled gracefully, so that
 					// other listeners are informed, too
-				listener.reported(unit, action, msg);
+				listener.reported(unit, action, maskedMessage);
 			} catch (Exception e) {
 				logger.warn("Listener threw an exception processing unit='" + unit + "', action='" + action
-						+ "', msg='" + msg + "'.", e);
+						+ "', msg='" + maskedMessage + "'.", e);
 			}
 		}
 	}
@@ -106,6 +109,21 @@ public class DefaultTestRunReporter implements TestRunReporter {
 	@Override
 	public void removeListener(TestRunListener listener) {
 		listeners.remove(listener);
+	}
+
+	@Override
+	public String mask(String unmasked) {
+		return this.stringMaskerDelegate.mask(unmasked);
+	}
+
+	@Override
+	public void registerMaskPattern(Pattern pattern) {
+		this.stringMaskerDelegate.registerMaskPattern(pattern);
+	}
+
+	@Override
+	public void unregisterMaskPattern(Pattern pattern) {
+		this.stringMaskerDelegate.unregisterMaskPattern(pattern);
 	}
 
 }

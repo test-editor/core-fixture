@@ -18,7 +18,7 @@ package org.testeditor.fixture.core;
  * 
  * Listeners can be registered to be informed about actions. 
  */
-public interface TestRunReporter {
+public interface TestRunReporter extends StringMasker {
 	enum SemanticUnit {
 		TEST(4), SPECIFICATION_STEP(3), COMPONENT(2), STEP(1);
 

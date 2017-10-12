@@ -17,6 +17,8 @@ import static org.mockito.Mockito.*;
 import static org.testeditor.fixture.core.TestRunReporter.Action.*;
 import static org.testeditor.fixture.core.TestRunReporter.SemanticUnit.*;
 
+import java.util.regex.Pattern;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InOrder;
@@ -45,6 +47,33 @@ public class TestDefaultTestRunReporter {
 				.reported(any(SemanticUnit.class), any(Action.class), any(String.class));
 		doThrow(new RuntimeException("exception")).when(brokenListener2)
 				.reported(any(SemanticUnit.class), any(Action.class), any(String.class));
+	}
+	
+	@Test
+	public void listenersGetMaskedMessageOnLeave() {
+		// given
+		classUnderTest.addListener(listener);
+		classUnderTest.registerMaskPattern(Pattern.compile(".*(mes).*"));
+		classUnderTest.enter(TEST, "Testmessage");
+
+		// when
+		classUnderTest.leave(TEST);
+
+		// then
+		verify(listener).reported(TEST, LEAVE, "Test*****sage");
+	}
+	
+	@Test
+	public void listenersGetMaskedMessage() {
+		// given
+		classUnderTest.addListener(listener);
+		classUnderTest.registerMaskPattern(Pattern.compile(".*(mes).*"));
+
+		// when
+		classUnderTest.enter(TEST, "Testmessage");
+
+		// then
+		verify(listener).reported(TEST, ENTER, "Test*****sage");
 	}
 
 	@Test
