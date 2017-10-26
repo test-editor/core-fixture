@@ -1,3 +1,16 @@
+/*******************************************************************************
+ * Copyright (c) 2012 - 2017 Signal Iduna Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ * Signal Iduna Corporation - initial API and implementation
+ * akquinet AG
+ * itemis AG
+ *******************************************************************************/
+
 package org.testeditor.fixture.core.logging;
 
 import org.junit.Assert;
@@ -26,7 +39,8 @@ public class FilenameHelperTest {
     public void createLongTestCaseName() {
         // given
         String filebaseName = "Host";
-        String testCaseName = "ThisIsaVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryLoginTest";
+        String testCaseName = "ThisIsaVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVery"
+                + "VeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryLoginTest";
         String pathName = "screenshots";
         String fileType = "html";
 
@@ -35,13 +49,15 @@ public class FilenameHelperTest {
 
         // then
         Assert.assertTrue(constructedFilename.matches(
-                "screenshots\\/ThisIsaVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryV\\/\\d{8}\\/\\d{6}\\.\\d{3}-Host.html"));
+                "screenshots\\/ThisIsaVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVery"
+                        + "VeryVeryVeryVeryVeryVeryVeryVeryVeryVeryV\\/\\d{8}\\/\\d{6}\\.\\d{3}-Host.html"));
     }
 
     @Test
     public void createLongFileBaseName() {
         // given
-        String filebaseName = "ThisIsaVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVerysHost";
+        String filebaseName = "ThisIsaVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVery"
+                + "VeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVerysHost";
         String testCaseName = "LoginTest";
         String pathName = "screenshots";
         String fileType = "html";
@@ -51,7 +67,8 @@ public class FilenameHelperTest {
 
         // then
         Assert.assertTrue(constructedFilename.matches(
-                "screenshots\\/LoginTest\\/\\d{8}\\/\\d{6}.\\d{3}-ThisIsaVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryV.html"));
+                "screenshots\\/LoginTest\\/\\d{8}\\/\\d{6}.\\d{3}-ThisIsaVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVery"
+                        + "VeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryV.html"));
     }
 
 }
