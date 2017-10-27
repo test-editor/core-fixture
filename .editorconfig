@@ -1,0 +1,29 @@
+# http://editorconfig.org
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+max_line_length = 120
+
+[*.{js,ts,json,yml}]
+indent_style = space
+indent_size = 2
+
+[*.{java,gradle}]
+indent_style = space
+indent_size = 4
+
+[*.{aml,tcl,tsl,tml,config}]
+indent_style = space
+indent_size = 4
+
+[*.xtend]
+indent_style = tab
+indent_size = 4
+
+[*.md]
+max_line_length = 0
+trim_trailing_whitespace = false

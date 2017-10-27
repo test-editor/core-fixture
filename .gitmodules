@@ -1,0 +1,3 @@
+[submodule "code-style"]
+	path = code-style
+	url = https://github.com/test-editor/code-style.git
