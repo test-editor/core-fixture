@@ -11,6 +11,7 @@ A core fixture will be used by a concrete test driver like e.g. web-fixture.
 
 ### Build
 
+    git submodule update --init --recursive
     ./gradlew build
 
 ### Release process
