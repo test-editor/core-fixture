@@ -13,6 +13,8 @@
 
 package org.testeditor.fixture.core;
 
+import java.util.Map;
+
 /**
  * Used for reporting actions during test execution. Each action can be
  * described unambiguously by a combination of SemanticUnit x Action x Message
@@ -21,25 +23,7 @@ package org.testeditor.fixture.core;
  */
 public interface TestRunReporter {
     enum SemanticUnit {
-        TEST(4), SPECIFICATION_STEP(3), COMPONENT(2), STEP(1);
-
-        private final int rank; // internal, never to be used outside this enum
-
-        private SemanticUnit(final int rank) {
-            this.rank = rank;
-        }
-
-        /**
-         * compare two SemanticUnit ranks
-         * 
-         * @return < 0 if other is of lower rank<br/>
-         *         0 if both are of equal rank<br/>
-         *         > 0 if other is of higher rank<br/>
-         */
-        public int compareRank(SemanticUnit other) {
-            return rank - other.rank;
-        }
-
+        TEST, SPECIFICATION_STEP, COMPONENT, STEP, MACRO_LIB, MACRO, SETUP, CLEANUP
     }
 
     enum Action {
@@ -50,15 +34,16 @@ public interface TestRunReporter {
      * called by test execution to indicate that unit x Action.ENTER x msg is
      * executed
      */
-    void enter(SemanticUnit unit, String msg);
+    void enter(SemanticUnit unit, String msg, String ID, String status, Map<String, String> variableParameters);
 
     /**
      * called by test execution to indicate that unit x Action.LEAVE is executed
      */
-    void leave(SemanticUnit unit);
+    void leave(SemanticUnit unit, String msg, String ID, String status, Map<String, String> variableParameters);
 
     /** listen to any action */
     void addListener(TestRunListener listener);
 
     void removeListener(TestRunListener listener);
+
 }

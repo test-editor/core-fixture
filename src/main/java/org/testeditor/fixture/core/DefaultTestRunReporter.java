@@ -14,10 +14,8 @@
 package org.testeditor.fixture.core;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,28 +29,20 @@ import org.slf4j.MDC;
 public class DefaultTestRunReporter implements TestRunReporter {
 
     protected static final Logger logger = LoggerFactory.getLogger(AbstractTestCase.class);
-
+    
     // logger (implemented as listener) is always reported on before all other
     // listeners!
     private final TestRunListener logListener = new DefaultLoggingListener();
 
     // per semantic unit only one may be active
-    private Map<SemanticUnit, String> enteredUnits = new LinkedHashMap<SemanticUnit, String>();
-
     private List<TestRunListener> listeners = new ArrayList<TestRunListener>();
 
     @Override
-    public void enter(SemanticUnit unit, String msg) {
-        if (enteredUnits.containsKey(unit)) {
-            leave(unit); // must leave before entering a new one
-        }
-
+    public void enter(SemanticUnit unit, String msg, String ID, String status, Map<String, String> variables) {
         if (unit == SemanticUnit.TEST) {
             MDC.put("TestName", "TE-Test: " + msg.replaceAll("^.*\\.", ""));
         }
-
-        informListeners(unit, Action.ENTER, msg);
-        enteredUnits.put(unit, msg);
+        informListeners(unit, Action.ENTER, msg, ID, status, variables);
     }
 
     /**
@@ -61,38 +51,24 @@ public class DefaultTestRunReporter implements TestRunReporter {
      * all other entered units are left!
      */
     @Override
-    public void leave(SemanticUnit unit) {
-        for (SemanticUnit unitToLeave : enteredSortedUnitsOfLowerOrEqualRank(unit)) {
-            informListeners(unitToLeave, Action.LEAVE, enteredUnits.get(unitToLeave));
-            enteredUnits.remove(unitToLeave);
-        }
-
+    public void leave(SemanticUnit unit, String msg, String ID, String status, Map<String, String> variables) {
+        informListeners(unit, Action.LEAVE, msg, ID, status, variables);
+        
         if (unit == SemanticUnit.TEST) {
             MDC.remove("TestName");
         }
     }
 
     /**
-     * return a reverse rank sorted list (lowest rank first) of SemanticUnits that
-     * were entered of lower or equal rank
-     */
-    private List<SemanticUnit> enteredSortedUnitsOfLowerOrEqualRank(SemanticUnit unit) {
-        return enteredUnits.keySet().stream() //
-                .sorted((u1, u2) -> u1.compareRank(u2)) //
-                .filter((u) -> u.compareRank(unit) <= 0) //
-                .collect(Collectors.toList());
-    }
-
-    /**
      * make sure that all registered listeners are informed, order is not guaranteed
      */
-    private void informListeners(SemanticUnit unit, Action action, String msg) {
-        logListener.reported(unit, action, msg); // logListener is always reported to first!
+    private void informListeners(SemanticUnit unit, Action action, String msg, String ID, String status, Map<String,String> variables) {
+        logListener.reported(unit, action, msg, ID, status, variables); // logListener is always reported to first!
         for (TestRunListener listener : listeners) {
             try {
                 // make sure that an exception is handled gracefully, so that
                 // other listeners are informed, too
-                listener.reported(unit, action, msg);
+                listener.reported(unit, action, msg, ID, status, variables);
             } catch (Exception e) {
                 logger.warn("Listener threw an exception processing unit='" + unit + "', action='" + action + "', msg='"
                         + msg + "'.", e);

@@ -13,6 +13,9 @@
 
 package org.testeditor.fixture.core;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.junit.After;
 import org.junit.Before;
 import org.testeditor.fixture.core.TestRunReporter.SemanticUnit;
@@ -23,6 +26,7 @@ import org.testeditor.fixture.core.TestRunReporter.SemanticUnit;
 public class AbstractTestCase {
 
     protected final TestRunReporter reporter;
+    protected long runningNumber;
 
     /**
      * default ctor
@@ -31,22 +35,43 @@ public class AbstractTestCase {
         // initialization is done in ctor to allow other ctors to access reporter
         // to allow registration before the first event is reported (ENTER TEST)
         reporter = createTestRunReporter();
+        runningNumber = 0;
+    }
+    
+    protected String getNewId() {
+        runningNumber++;
+        return "ID" + Long.toString(runningNumber);
     }
 
     @Before
     public void initTestLaunch() {
-        reporter.enter(SemanticUnit.TEST, getClass().getName());
+        reporter.enter(SemanticUnit.TEST, getClass().getName(), "IDROOT", "?", null);
     }
 
     @After
     public void finishtestLaunch() {
-        reporter.leave(SemanticUnit.TEST);
+        reporter.leave(SemanticUnit.TEST, getClass().getName(), "IDROOT", "OK", null);
     }
 
     // may be overridden to provide alternate implementations of the test run
     // reporter
     protected TestRunReporter createTestRunReporter() {
         return new DefaultTestRunReporter();
+    }
+    
+    /**
+     * utility builder function to pass varable-names and values as hashmap
+     * @param strings make sure there is an even number of parameters used!
+     * @return
+     */
+    public static Map<String, String> variables(String...strings) {
+        HashMap<String,String> result = new HashMap<>();
+
+        for (int i=0; i<strings.length / 2; i++) {
+            result.put(strings[i*2], strings[i*2+1]);
+        }
+
+        return result;
     }
 
 }
