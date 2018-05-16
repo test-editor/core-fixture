@@ -1,23 +1,23 @@
 plugins {
     id 'maven'
     id 'java'
-    id 'com.jfrog.bintray' version '1.7.3'
-    id 'net.researchgate.release' version '2.6.0'
+    id 'com.jfrog.bintray' version '1.8.0'
+    id 'net.researchgate.release' version '2.7.0'
 }
 
 apply from: 'code-style/codestyle.gradle'
 
 dependencies {
-	compile 'org.slf4j:slf4j-api:1.7.18'
-	compile 'org.apache.logging.log4j:log4j-core:2.5'
-	compile 'org.apache.logging.log4j:log4j-api:2.5'
-	compile 'org.apache.logging.log4j:log4j-slf4j-impl:2.5'
+	compile 'org.slf4j:slf4j-api:1.7.25'
+	compile 'org.apache.logging.log4j:log4j-core:2.11.0'
+	compile 'org.apache.logging.log4j:log4j-api:2.11.0'
+	compile 'org.apache.logging.log4j:log4j-slf4j-impl:2.11.0'
 	compile 'junit:junit:4.12'
-	compile 'org.apache.commons:commons-lang3:3.4'
+	compile 'org.apache.commons:commons-lang3:3.7'
 	testCompile 'org.mockito:mockito-all:1.10.19'
 }
 
-/* 
+/*
  * Default code for all fixtures below
  */
 repositories {
@@ -65,7 +65,7 @@ bintray {
     user = System.getenv('BINTRAY_USER')
     key = System.getenv('BINTRAY_KEY')
     configurations = ['archives']
-    publish = true 
+    publish = true
     pkg {
         repo = 'Fixtures'
         name = project.name
