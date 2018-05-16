@@ -29,7 +29,7 @@ import org.slf4j.MDC;
 public class DefaultTestRunReporter implements TestRunReporter {
 
     protected static final Logger logger = LoggerFactory.getLogger(AbstractTestCase.class);
-    
+
     // logger (implemented as listener) is always reported on before all other
     // listeners!
     private final TestRunListener logListener = new DefaultLoggingListener();
@@ -38,11 +38,11 @@ public class DefaultTestRunReporter implements TestRunReporter {
     private List<TestRunListener> listeners = new ArrayList<TestRunListener>();
 
     @Override
-    public void enter(SemanticUnit unit, String msg, String ID, Status status, Map<String, String> variables) {
+    public void enter(SemanticUnit unit, String msg, String id, Status status, Map<String, String> variables) {
         if (unit == SemanticUnit.TEST) {
             MDC.put("TestName", "TE-Test: " + msg.replaceAll("^.*\\.", ""));
         }
-        informListeners(unit, Action.ENTER, msg, ID, status, variables);
+        informListeners(unit, Action.ENTER, msg, id, status, variables);
     }
 
     /**
@@ -51,9 +51,9 @@ public class DefaultTestRunReporter implements TestRunReporter {
      * all other entered units are left!
      */
     @Override
-    public void leave(SemanticUnit unit, String msg, String ID, Status status, Map<String, String> variables) {
-        informListeners(unit, Action.LEAVE, msg, ID, status, variables);
-        
+    public void leave(SemanticUnit unit, String msg, String id, Status status, Map<String, String> variables) {
+        informListeners(unit, Action.LEAVE, msg, id, status, variables);
+
         if (unit == SemanticUnit.TEST) {
             MDC.remove("TestName");
         }
@@ -62,13 +62,14 @@ public class DefaultTestRunReporter implements TestRunReporter {
     /**
      * make sure that all registered listeners are informed, order is not guaranteed
      */
-    private void informListeners(SemanticUnit unit, Action action, String msg, String ID, Status status, Map<String,String> variables) {
-        logListener.reported(unit, action, msg, ID, status, variables); // logListener is always reported to first!
+    private void informListeners(SemanticUnit unit, Action action, String msg, String id, Status status,
+            Map<String, String> variables) {
+        logListener.reported(unit, action, msg, id, status, variables); // logListener is always reported to first!
         for (TestRunListener listener : listeners) {
             try {
                 // make sure that an exception is handled gracefully, so that
                 // other listeners are informed, too
-                listener.reported(unit, action, msg, ID, status, variables);
+                listener.reported(unit, action, msg, id, status, variables);
             } catch (Exception e) {
                 logger.warn("Listener threw an exception processing unit='" + unit + "', action='" + action + "', msg='"
                         + msg + "'.", e);

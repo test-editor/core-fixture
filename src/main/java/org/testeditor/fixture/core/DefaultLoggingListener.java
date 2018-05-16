@@ -36,29 +36,29 @@ public class DefaultLoggingListener implements TestRunListener {
     private int currentIndent = 0;
 
     @Override
-    public void reported(SemanticUnit unit, Action action, String message, String ID, Status status,
+    public void reported(SemanticUnit unit, Action action, String message, String id, Status status,
             Map<String, String> variables) {
         if (Action.ENTER.equals(action)) {
-            logTechnicalReference(unit, action, message, ID);
+            logTechnicalReference(unit, action, message, id);
         }
         switch (unit) {
             case TEST:
-                logTest(action, message, ID, status);
+                logTest(action, message, id, status);
                 break;
             case SPECIFICATION_STEP:
-                logUnit("Spec step", action, message, ID, status);
+                logUnit("Spec step", action, message, id, status);
                 break;
             case COMPONENT:
-                logUnit("Component", action, message, ID, status);
+                logUnit("Component", action, message, id, status);
                 break;
             case STEP:
-                logUnit("Test step", action, message, ID, status);
+                logUnit("Test step", action, message, id, status);
                 break;
             case MACRO_LIB:
-                logUnit("Macro lib", action, message, ID, status);
+                logUnit("Macro lib", action, message, id, status);
                 break;
             case MACRO:
-                logUnit("Macro    ", action, message, ID, status);
+                logUnit("Macro    ", action, message, id, status);
                 break;
             default:
                 logger.error("Unknown semantic test unit='{}' encountered during logging through class='{}'.", unit,
@@ -78,11 +78,11 @@ public class DefaultLoggingListener implements TestRunListener {
                 break;
         }
         if (Action.LEAVE.equals(action)) {
-            logTechnicalReference(unit, action, message, ID);
+            logTechnicalReference(unit, action, message, id);
         }
     }
 
-    private void logTest(Action action, String message, String ID, Status status) {
+    private void logTest(Action action, String message, String id, Status status) {
         switch (action) {
             case ENTER:
                 logger.info("****************************************************");
@@ -107,18 +107,23 @@ public class DefaultLoggingListener implements TestRunListener {
         return StringUtils.repeat(' ', currentIndent);
     }
 
-    private void logUnit(String unitText, Action action, String message, String ID, Status status) {
+    private void logUnit(String unitText, Action action, String message, String id, Status status) {
         switch (action) {
             case ENTER:
-                logger.trace(indentPrefix() + ">{}[{}]> {}, Status={}", unitText, ID, message, status);
+                logger.trace(indentPrefix() + ">{}[{}]> {}, Status={}", unitText, id, message, status);
+                break;
             case LEAVE:
-                logger.trace(indentPrefix() + "<{}[{}]< {}, Status={}", unitText, ID, message, status);
+                logger.trace(indentPrefix() + "<{}[{}]< {}, Status={}", unitText, id, message, status);
+                break;
+            default: 
+                // do nothing
+                break;
         }
     }
 
-    private void logTechnicalReference(SemanticUnit unit, Action action, String message, String ID) {
+    private void logTechnicalReference(SemanticUnit unit, Action action, String message, String id) {
         logger.info("@" + unit.toString() + ":" + action.toString() + ":" + Integer.toHexString(message.hashCode())
-                + ":" + ID + "  <-- DO NOT REMOVE, NEEDED FOR REFERENCING");
+                + ":" + id + "  <-- DO NOT REMOVE, NEEDED FOR REFERENCING");
     }
 
 }

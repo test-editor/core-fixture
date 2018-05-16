@@ -44,12 +44,12 @@ public interface TestRunReporter {
      * called by test execution to indicate that unit x Action.ENTER x msg is
      * executed
      */
-    void enter(SemanticUnit unit, String msg, String ID, Status status, Map<String, String> variableParameters);
+    void enter(SemanticUnit unit, String msg, String id, Status status, Map<String, String> variableParameters);
 
     /**
      * called by test execution to indicate that unit x Action.LEAVE is executed
      */
-    void leave(SemanticUnit unit, String msg, String ID, Status status, Map<String, String> variableParameters);
+    void leave(SemanticUnit unit, String msg, String id, Status status, Map<String, String> variableParameters);
 
     /** listen to any action */
     void addListener(TestRunListener listener);

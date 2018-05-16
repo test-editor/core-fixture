@@ -33,25 +33,25 @@ public class DefaultYamlCallTreeListener implements TestRunListener {
 
     protected static final Logger logger = LoggerFactory.getLogger(DefaultYamlCallTreeListener.class);
 
-    public final static int YAML_INDENTIATION = 2;
+    public static final int YAML_INDENTIATION = 2;
 
     protected Map<String, Node> callTreeNodeMap = new HashMap<>();
     protected String testCaseSource;
-    protected String commitID;
+    protected String commitId;
 
     protected static class Node {
         public SemanticUnit unit;
         public String message;
-        public String ID;
+        public String id;
         public long nanoTimeEntered;
         public long nanoTimeLeft;
         public Status status;
         public int parentIndentation;
 
-        public Node(SemanticUnit unit, String message, String ID) {
+        public Node(SemanticUnit unit, String message, String id) {
             this.unit = unit;
             this.message = message;
-            this.ID = ID;
+            this.id = id;
         }
 
         public void enterNode(int parentIndentation, Status status) {
@@ -70,10 +70,18 @@ public class DefaultYamlCallTreeListener implements TestRunListener {
     protected OutputStreamWriter outputStreamWriter;
     int currentIndentation = 0;
 
-    public DefaultYamlCallTreeListener(OutputStream outputStream, String testCaseSource, String commitID) {
+    /**
+     * Ctor
+     * 
+     * @param outputStream where yaml is written to
+     * @param testCaseSource file/resource path identifying this test within the
+     *            repo
+     * @param commitId repo commit id identifying this test version
+     */
+    public DefaultYamlCallTreeListener(OutputStream outputStream, String testCaseSource, String commitId) {
         this.outputStreamWriter = new OutputStreamWriter(outputStream, StandardCharsets.UTF_8);
         this.testCaseSource = testCaseSource;
-        this.commitID = commitID;
+        this.commitId = commitId;
     }
 
     /*
@@ -86,38 +94,42 @@ public class DefaultYamlCallTreeListener implements TestRunListener {
      */
 
     @Override
-    public void reported(SemanticUnit unit, Action action, String message, String ID, Status status,
+    public void reported(SemanticUnit unit, Action action, String message, String id, Status status,
             Map<String, String> variables) {
         switch (unit) {
             case TEST:
-                writeTestNode(action, message, ID, status, variables);
+                writeTestNode(action, message, id, status, variables);
                 break;
             default:
-                writeNode(unit, action, message, ID, status, variables);
+                writeNode(unit, action, message, id, status, variables);
                 break;
 
         }
     }
 
-    private void writeNode(SemanticUnit unit, Action action, String message, String ID, Status status,
+    private void writeNode(SemanticUnit unit, Action action, String message, String id, Status status,
             Map<String, String> variables) {
         switch (action) {
             case ENTER:
-                enterNode(unit, message, ID, status, variables);
+                enterNode(unit, message, id, status, variables);
                 break;
             case LEAVE:
-                leaveNode(ID, status, variables);
+                leaveNode(id, status, variables);
+                break;
+            default:
+                // do nothing
+                break;
         }
     }
 
-    private void enterNode(SemanticUnit unit, String message, String ID, Status status, Map<String, String> variables) {
-        Node node = new Node(unit, message, ID);
+    private void enterNode(SemanticUnit unit, String message, String id, Status status, Map<String, String> variables) {
+        Node node = new Node(unit, message, id);
         node.enterNode(currentIndentation, status);
-        callTreeNodeMap.put(ID, node);
+        callTreeNodeMap.put(id, node);
         writePrefixedString("-", "Node", unit.toString());
         currentIndentation += YAML_INDENTIATION;
         writeString("Message", node.message);
-        writeString("ID", node.ID);
+        writeString("ID", node.id);
         writeString("Enter", Long.toString(node.nanoTimeEntered));
         writeVariables("Pre", variables);
         writeString("Children", null);
@@ -137,8 +149,8 @@ public class DefaultYamlCallTreeListener implements TestRunListener {
         }
     }
 
-    private void leaveNode(String ID, Status status, Map<String, String> variables) {
-        Node node = callTreeNodeMap.get(ID);
+    private void leaveNode(String id, Status status, Map<String, String> variables) {
+        Node node = callTreeNodeMap.get(id);
         if (node != null) {
             node.leaveNode(status);
             currentIndentation = node.parentIndentation + YAML_INDENTIATION;
@@ -151,22 +163,26 @@ public class DefaultYamlCallTreeListener implements TestRunListener {
                 logger.error("flushing yaml call tree entry failed", e);
             }
         } else {
-            logger.error("Left unknown node with ID '" + StringEscapeUtils.escapeJava(ID) + "'");
+            logger.error("Left unknown node with ID '" + StringEscapeUtils.escapeJava(id) + "'");
         }
         currentIndentation -= YAML_INDENTIATION;
     }
 
-    private void writeTestNode(Action action, String message, String ID, Status status, Map<String, String> variables) {
+    private void writeTestNode(Action action, String message, String id, Status status, Map<String, String> variables) {
         try {
             switch (action) {
                 case ENTER:
                     writeString("Source", testCaseSource);
-                    writeString("CommitID", commitID);
+                    writeString("CommitID", commitId);
                     writeString("Started", Instant.now().toString());
-                    enterNode(SemanticUnit.TEST, message, ID, status, variables);
+                    enterNode(SemanticUnit.TEST, message, id, status, variables);
                     break;
                 case LEAVE:
-                    leaveNode(ID, status, variables);
+                    leaveNode(id, status, variables);
+                    break;
+                default:
+                    // do nothing
+                    break;
             }
         } catch (Exception e) {
             logger.error("writing yaml call tree entry failed", e);

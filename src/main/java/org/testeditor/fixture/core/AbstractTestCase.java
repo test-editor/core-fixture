@@ -39,12 +39,12 @@ import org.testeditor.fixture.core.TestRunReporter.Status;
  * </pre>
  */
 public class AbstractTestCase {
-
-    protected final TestRunReporter reporter; // reporter for current test status, register with this reported for
-                                              // addition listeners
-    private long runningNumber; // a number that is used to generate variables, holding call tree ids (used for
-                                // enter/leave reporting)
-    private Status finalStatus = Status.ERROR; // (probably an) assertion error if test is not finished as expected
+    // reporter for current test status, register with this reported for addition listeners
+    protected final TestRunReporter reporter; 
+    // a number that is used to generate variables, holding call tree ids (used for enter/leave reporting)
+    private long runningNumber; 
+    // (probably an) assertion error if test is not finished as expected
+    private Status finalStatus = Status.ERROR; 
 
     /**
      * default ctor

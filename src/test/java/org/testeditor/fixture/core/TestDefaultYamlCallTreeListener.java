@@ -46,7 +46,7 @@ public class TestDefaultYamlCallTreeListener {
                 AbstractTestCase.variables("a", "5", "b", "7"));
 
         // then
-        assertOutputWithoutNanosToEqual( //
+        assertOutputWithoutNanosToEqual(//
                 "Source: \"testcase\"\n" + //
                         "CommitID: \"decaf\"\n" + //
                         "- Node: \"TEST\"\n" + //
@@ -68,7 +68,7 @@ public class TestDefaultYamlCallTreeListener {
                 AbstractTestCase.variables("a", "5", "b", "7"));
 
         // then
-        assertOutputWithoutNanosToEqual( //
+        assertOutputWithoutNanosToEqual(//
                 "Source: \"testcase\"\n" + //
                         "CommitID: \"decaf\"\n" + //
                         "- Node: \"TEST\"\n" + //
@@ -103,7 +103,7 @@ public class TestDefaultYamlCallTreeListener {
         yamlCallTreeListenerUnderTest.reported(SemanticUnit.TEST, Action.LEAVE, "test", "4711", Status.OK, null);
 
         // then
-        assertOutputWithoutNanosToEqual( //
+        assertOutputWithoutNanosToEqual(//
                 "Source: \"testcase\"\n" + //
                         "CommitID: \"decaf\"\n" + //
                         "- Node: \"TEST\"\n" + //
@@ -155,7 +155,7 @@ public class TestDefaultYamlCallTreeListener {
         yamlCallTreeListenerUnderTest.reported(SemanticUnit.TEST, Action.LEAVE, "test", "4711", Status.ABORTED, null);
 
         // then
-        assertOutputWithoutNanosToEqual( //
+        assertOutputWithoutNanosToEqual(//
                 "Source: \"testcase\"\n" + //
                         "CommitID: \"decaf\"\n" + //
                         "- Node: \"TEST\"\n" + //

@@ -21,6 +21,6 @@ import org.testeditor.fixture.core.TestRunReporter.Status;
  * listener called by TestRunReporter if registered accordingly
  */
 public interface TestRunListener {
-    void reported(TestRunReporter.SemanticUnit unit, TestRunReporter.Action action, String message, String ID,
+    void reported(TestRunReporter.SemanticUnit unit, TestRunReporter.Action action, String message, String id,
             Status status, Map<String, String> variables);
 }
