@@ -21,18 +21,14 @@ public class FilenameHelper {
     private static final int FILENAME_MAXLEN = 128;
 
     /**
-     * Constructs a file name, based on the basic filenameBase provided. The
-     * final filename is constructed using the testcase a hash of the fixture
-     * itself and a shortened timestamp.
+     * Constructs a file name, based on the basic filenameBase provided. The final
+     * filename is constructed using the testcase a hash of the fixture itself and a
+     * shortened timestamp.
      * 
-     * @param pathName
-     *            the path in which the file is stored
-     * @param testcase
-     *            name of the test case which is executed
-     * @param filenameBase
-     *            user definable part of the final filename
-     * @param type
-     *            File type like "html", "png" or equivalent, depends which type
+     * @param pathName the path in which the file is stored
+     * @param testcase name of the test case which is executed
+     * @param filenameBase user definable part of the final filename
+     * @param type File type like "html", "png" or equivalent, depends which type
      *            should be created
      * @return the constructed filename with the above attributes
      */
