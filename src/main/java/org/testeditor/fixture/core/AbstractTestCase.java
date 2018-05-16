@@ -13,20 +13,38 @@
 
 package org.testeditor.fixture.core;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.After;
 import org.junit.Before;
 import org.testeditor.fixture.core.TestRunReporter.SemanticUnit;
+import org.testeditor.fixture.core.TestRunReporter.Status;
 
 /**
  * Class from which all generated unit tests are (transitively) derived
+ * 
+ * Every generated unit test class inherits (transitively in case of configs)
+ * from this abstract test class! Every generated class makes use of the
+ * interface of this class:
+ * 
+ * <pre>
+ * - calls to the reporter are generated (to report current test status)
+ * - newVarId s are generated to hold call tree ids used for enter/leave 
+ *   reporting 
+ * - initializsation/cleanup of junit 
+ * - finishTestWith to inform the test of the final status
+ * </pre>
  */
 public class AbstractTestCase {
 
-    protected final TestRunReporter reporter;
-    protected long runningNumber;
+    protected final TestRunReporter reporter; // reporter for current test status, register with this reported for
+                                              // addition listeners
+    private long runningNumber; // a number that is used to generate variables, holding call tree ids (used for
+                                // enter/leave reporting)
+    private Status finalStatus = Status.ERROR; // (probably an) assertion error if test is not finished as expected
 
     /**
      * default ctor
@@ -35,22 +53,38 @@ public class AbstractTestCase {
         // initialization is done in ctor to allow other ctors to access reporter
         // to allow registration before the first event is reported (ENTER TEST)
         reporter = createTestRunReporter();
+        List<TestRunListener> listeners = additionalListeners();
+        if (listeners != null) {
+            additionalListeners().stream().forEach(listener -> {
+                reporter.addListener(listener);
+            });
+        }
         runningNumber = 0;
     }
-    
-    protected String getNewId() {
+
+    protected String newVarId() {
         runningNumber++;
         return "ID" + Long.toString(runningNumber);
     }
 
     @Before
     public void initTestLaunch() {
-        reporter.enter(SemanticUnit.TEST, getClass().getName(), "IDROOT", "?", null);
+        reporter.enter(SemanticUnit.TEST, getClass().getName(), "IDROOT", Status.STARTED, null);
     }
 
     @After
     public void finishtestLaunch() {
-        reporter.leave(SemanticUnit.TEST, getClass().getName(), "IDROOT", "OK", null);
+        reporter.leave(SemanticUnit.TEST, getClass().getName(), "IDROOT", this.finalStatus, null);
+    }
+
+    /**
+     * Call this method with the real test result status, before finishing the
+     * execute test method!
+     * 
+     * @param status
+     */
+    protected void finishedTestWith(Status status) {
+        this.finalStatus = status;
     }
 
     // may be overridden to provide alternate implementations of the test run
@@ -58,17 +92,24 @@ public class AbstractTestCase {
     protected TestRunReporter createTestRunReporter() {
         return new DefaultTestRunReporter();
     }
-    
+
+    // may be override to add aditional test run listeners to the reporter
+    protected List<TestRunListener> additionalListeners() {
+        return Collections.emptyList();
+    }
+
     /**
      * utility builder function to pass varable-names and values as hashmap
-     * @param strings make sure there is an even number of parameters used!
+     * 
+     * @param strings make sure there is an even number of parameters used, since
+     *            only the first even numbered parameters are packed into the map
      * @return
      */
-    public static Map<String, String> variables(String...strings) {
-        HashMap<String,String> result = new HashMap<>();
+    public static Map<String, String> variables(String... strings) {
+        HashMap<String, String> result = new HashMap<>();
 
-        for (int i=0; i<strings.length / 2; i++) {
-            result.put(strings[i*2], strings[i*2+1]);
+        for (int i = 0; i < strings.length / 2; i++) {
+            result.put(strings[i * 2], strings[i * 2 + 1]);
         }
 
         return result;

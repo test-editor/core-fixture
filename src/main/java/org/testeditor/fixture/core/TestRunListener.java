@@ -15,9 +15,12 @@ package org.testeditor.fixture.core;
 
 import java.util.Map;
 
+import org.testeditor.fixture.core.TestRunReporter.Status;
+
 /**
  * listener called by TestRunReporter if registered accordingly
  */
 public interface TestRunListener {
-    void reported(TestRunReporter.SemanticUnit unit, TestRunReporter.Action action, String message, String ID, String status, Map<String,String> variables);
+    void reported(TestRunReporter.SemanticUnit unit, TestRunReporter.Action action, String message, String ID,
+            Status status, Map<String, String> variables);
 }

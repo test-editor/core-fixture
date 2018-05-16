@@ -30,16 +30,26 @@ public interface TestRunReporter {
         ENTER, LEAVE
     }
 
+    enum Status {
+        OK, // Was run, everything ok
+        UNKNOWN, // Not run yet, no status
+        STARTED, // Running
+        ABORTED, // Aborted because of unexpected problems during execution
+        ERROR, // Was run but ran into an assertion error
+        WARNING, // Was run (and continues) but ran into a warning
+        INFO // Was run (and continues) and ran into an information
+    }
+
     /**
      * called by test execution to indicate that unit x Action.ENTER x msg is
      * executed
      */
-    void enter(SemanticUnit unit, String msg, String ID, String status, Map<String, String> variableParameters);
+    void enter(SemanticUnit unit, String msg, String ID, Status status, Map<String, String> variableParameters);
 
     /**
      * called by test execution to indicate that unit x Action.LEAVE is executed
      */
-    void leave(SemanticUnit unit, String msg, String ID, String status, Map<String, String> variableParameters);
+    void leave(SemanticUnit unit, String msg, String ID, Status status, Map<String, String> variableParameters);
 
     /** listen to any action */
     void addListener(TestRunListener listener);

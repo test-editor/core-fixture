@@ -21,21 +21,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testeditor.fixture.core.TestRunReporter.Action;
 import org.testeditor.fixture.core.TestRunReporter.SemanticUnit;
+import org.testeditor.fixture.core.TestRunReporter.Status;
 
 /**
  * Default implementation of a test run logger. Logs enter and leave of TEST.
  * Logs enter (only) for SPECIFICATION, COMPONENT and STEP
  */
 public class DefaultLoggingListener implements TestRunListener {
-    
+
     private static final int INDENT = 2;
 
     protected static final Logger logger = LoggerFactory.getLogger(AbstractTestCase.class);
     private long start;
     private int currentIndent = 0;
-    
+
     @Override
-    public void reported(SemanticUnit unit, Action action, String message, String ID, String status, Map<String,String> variables) {
+    public void reported(SemanticUnit unit, Action action, String message, String ID, Status status,
+            Map<String, String> variables) {
         if (Action.ENTER.equals(action)) {
             logTechnicalReference(unit, action, message, ID);
         }
@@ -63,9 +65,13 @@ public class DefaultLoggingListener implements TestRunListener {
                         getClass().getName());
                 break;
         }
-        switch(action) {
-            case ENTER: currentIndent+=INDENT; break;
-            case LEAVE: currentIndent-=INDENT; break;
+        switch (action) {
+            case ENTER:
+                currentIndent += INDENT;
+                break;
+            case LEAVE:
+                currentIndent -= INDENT;
+                break;
             default:
                 logger.error("Unknown action='{}' encountered during logging through class='{}'.", action,
                         getClass().getName());
@@ -76,7 +82,7 @@ public class DefaultLoggingListener implements TestRunListener {
         }
     }
 
-    private void logTest(Action action, String message, String ID, String status) {
+    private void logTest(Action action, String message, String ID, Status status) {
         switch (action) {
             case ENTER:
                 logger.info("****************************************************");
@@ -96,20 +102,23 @@ public class DefaultLoggingListener implements TestRunListener {
                 break;
         }
     }
-    
+
     private String indentPrefix() {
         return StringUtils.repeat(' ', currentIndent);
     }
 
-    private void logUnit(String unitText, Action action, String message, String ID, String status) {
-        switch(action) {
-            case ENTER: logger.trace(indentPrefix() + ">{}[{}]> {}, Status={}", unitText, ID, message, status);
-            case LEAVE: logger.trace(indentPrefix() + "<{}[{}]< {}, Status={}", unitText, ID, message, status);
+    private void logUnit(String unitText, Action action, String message, String ID, Status status) {
+        switch (action) {
+            case ENTER:
+                logger.trace(indentPrefix() + ">{}[{}]> {}, Status={}", unitText, ID, message, status);
+            case LEAVE:
+                logger.trace(indentPrefix() + "<{}[{}]< {}, Status={}", unitText, ID, message, status);
         }
     }
 
     private void logTechnicalReference(SemanticUnit unit, Action action, String message, String ID) {
-        logger.info("@"+unit.toString()+":"+action.toString()+":"+Integer.toHexString(message.hashCode())+":"+ID+"  <-- DO NOT REMOVE, NEEDED FOR REFERENCING");
+        logger.info("@" + unit.toString() + ":" + action.toString() + ":" + Integer.toHexString(message.hashCode())
+                + ":" + ID + "  <-- DO NOT REMOVE, NEEDED FOR REFERENCING");
     }
 
 }

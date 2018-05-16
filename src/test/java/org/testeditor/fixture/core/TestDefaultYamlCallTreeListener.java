@@ -1,3 +1,15 @@
+/*******************************************************************************
+ * Copyright (c) 2012 - 2018 Signal Iduna Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ * Signal Iduna Corporation - initial API and implementation
+ * akquinet AG
+ * itemis AG
+ *******************************************************************************/
 
 package org.testeditor.fixture.core;
 
@@ -14,12 +26,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.testeditor.fixture.core.TestRunReporter.Action;
 import org.testeditor.fixture.core.TestRunReporter.SemanticUnit;
+import org.testeditor.fixture.core.TestRunReporter.Status;
 
 public class TestDefaultYamlCallTreeListener {
 
     private DefaultYamlCallTreeListener yamlCallTreeListenerUnderTest = null;
     private ByteArrayOutputStream outputStream = null;
-    
 
     @Before
     public void setup() {
@@ -30,11 +42,12 @@ public class TestDefaultYamlCallTreeListener {
     @Test
     public void testYamlOfEnteredTest() throws IOException {
         // when
-        yamlCallTreeListenerUnderTest.reported(SemanticUnit.TEST, Action.ENTER, "test", "4711", "?", AbstractTestCase.variables("a","5","b","7"));
+        yamlCallTreeListenerUnderTest.reported(SemanticUnit.TEST, Action.ENTER, "test", "4711", Status.STARTED,
+                AbstractTestCase.variables("a", "5", "b", "7"));
 
         // then
         assertOutputWithoutNanosToEqual( //
-                        "Source: \"testcase\"\n" + //
+                "Source: \"testcase\"\n" + //
                         "CommitID: \"decaf\"\n" + //
                         "- Node: \"TEST\"\n" + //
                         "  Message: \"test\"\n" + //
@@ -50,120 +63,124 @@ public class TestDefaultYamlCallTreeListener {
     @Test
     public void testYamlOfEnteredAndLeftTest() {
         // when
-        yamlCallTreeListenerUnderTest.reported(SemanticUnit.TEST, Action.ENTER, "test", "4711", "?", null);
-        yamlCallTreeListenerUnderTest.reported(SemanticUnit.TEST, Action.LEAVE, "test", "4711", "OK", AbstractTestCase.variables("a","5","b","7"));
+        yamlCallTreeListenerUnderTest.reported(SemanticUnit.TEST, Action.ENTER, "test", "4711", Status.STARTED, null);
+        yamlCallTreeListenerUnderTest.reported(SemanticUnit.TEST, Action.LEAVE, "test", "4711", Status.OK,
+                AbstractTestCase.variables("a", "5", "b", "7"));
 
         // then
         assertOutputWithoutNanosToEqual( //
-                        "Source: \"testcase\"\n" + //
+                "Source: \"testcase\"\n" + //
                         "CommitID: \"decaf\"\n" + //
                         "- Node: \"TEST\"\n" + //
                         "  Message: \"test\"\n" + //
-                        "  ID: \"4711\"\n" + //                       
+                        "  ID: \"4711\"\n" + //
                         "  PreVariables:\n" + //
                         "  Children:\n" + //
                         "  Status: \"OK\"\n" + //
                         "  PostVariables:\n" + //
                         "  - a: \"5\"\n" + //
-                        "  - b: \"7\"\n" 
-                        );
+                        "  - b: \"7\"\n");
         assertOutputContainsRegex("(?s).*\n  Enter: \"[0-9]+\"\n.*");
         assertOutputContainsRegex("(?s).*\n  Leave: \"[0-9]+\"\n.*");
     }
-    
+
     @Test
     public void testYamlEnteredAndLeftDownToTestStep() {
         // when
-        yamlCallTreeListenerUnderTest.reported(SemanticUnit.TEST, Action.ENTER, "test", "4711", "?", null);
-        yamlCallTreeListenerUnderTest.reported(SemanticUnit.SPECIFICATION_STEP, Action.ENTER, "spec step", "4712", "?", null);
-        yamlCallTreeListenerUnderTest.reported(SemanticUnit.COMPONENT, Action.ENTER, "component", "4713", "?", null);
-        yamlCallTreeListenerUnderTest.reported(SemanticUnit.STEP, Action.ENTER, "step", "4714", "?", null);
-        yamlCallTreeListenerUnderTest.reported(SemanticUnit.STEP, Action.LEAVE, "step", "4714", "OK", null);
-        yamlCallTreeListenerUnderTest.reported(SemanticUnit.STEP, Action.ENTER, "step", "4715", "?", null);
-        yamlCallTreeListenerUnderTest.reported(SemanticUnit.STEP, Action.LEAVE, "step", "4715", "OK", null);
-        yamlCallTreeListenerUnderTest.reported(SemanticUnit.COMPONENT, Action.LEAVE, "component", "4713", "OK", null);
-        yamlCallTreeListenerUnderTest.reported(SemanticUnit.SPECIFICATION_STEP, Action.LEAVE, "spec step", "4712", "OK", null);
-        yamlCallTreeListenerUnderTest.reported(SemanticUnit.TEST, Action.LEAVE, "test", "4711", "OK", null);
-        
+        yamlCallTreeListenerUnderTest.reported(SemanticUnit.TEST, Action.ENTER, "test", "4711", Status.STARTED, null);
+        yamlCallTreeListenerUnderTest.reported(SemanticUnit.SPECIFICATION_STEP, Action.ENTER, "spec step", "4712",
+                Status.STARTED, null);
+        yamlCallTreeListenerUnderTest.reported(SemanticUnit.COMPONENT, Action.ENTER, "component", "4713",
+                Status.STARTED, null);
+        yamlCallTreeListenerUnderTest.reported(SemanticUnit.STEP, Action.ENTER, "step", "4714", Status.STARTED, null);
+        yamlCallTreeListenerUnderTest.reported(SemanticUnit.STEP, Action.LEAVE, "step", "4714", Status.OK, null);
+        yamlCallTreeListenerUnderTest.reported(SemanticUnit.STEP, Action.ENTER, "step", "4715", Status.STARTED, null);
+        yamlCallTreeListenerUnderTest.reported(SemanticUnit.STEP, Action.LEAVE, "step", "4715", Status.OK, null);
+        yamlCallTreeListenerUnderTest.reported(SemanticUnit.COMPONENT, Action.LEAVE, "component", "4713", Status.OK,
+                null);
+        yamlCallTreeListenerUnderTest.reported(SemanticUnit.SPECIFICATION_STEP, Action.LEAVE, "spec step", "4712",
+                Status.OK, null);
+        yamlCallTreeListenerUnderTest.reported(SemanticUnit.TEST, Action.LEAVE, "test", "4711", Status.OK, null);
+
         // then
         assertOutputWithoutNanosToEqual( //
                 "Source: \"testcase\"\n" + //
-                "CommitID: \"decaf\"\n" + //
-                "- Node: \"TEST\"\n" + //
-                "  Message: \"test\"\n" + //
-                "  ID: \"4711\"\n" + //
-                "  PreVariables:\n" + //
-                "  Children:\n" + //
-                "  - Node: \"SPECIFICATION_STEP\"\n" + //
-                "    Message: \"spec step\"\n" + //
-                "    ID: \"4712\"\n" + //
-                "    PreVariables:\n" + //
-                "    Children:\n" + //
-                "    - Node: \"COMPONENT\"\n" + //
-                "      Message: \"component\"\n" + //
-                "      ID: \"4713\"\n" + //
-                "      PreVariables:\n" + //
-                "      Children:\n" + //
-                "      - Node: \"STEP\"\n" + //
-                "        Message: \"step\"\n" + //
-                "        ID: \"4714\"\n" + //
-                "        PreVariables:\n" + //
-                "        Children:\n" + //
-                "        Status: \"OK\"\n" + //
-                "        PostVariables:\n" + //
-                "      - Node: \"STEP\"\n" + //
-                "        Message: \"step\"\n" + //
-                "        ID: \"4715\"\n" + //
-                "        PreVariables:\n" + //
-                "        Children:\n" + //
-                "        Status: \"OK\"\n" + //
-                "        PostVariables:\n" + //
-                "      Status: \"OK\"\n" + //
-                "      PostVariables:\n" + //
-                "    Status: \"OK\"\n" + //
-                "    PostVariables:\n" + //
-                "  Status: \"OK\"\n" + //
-                "  PostVariables:\n"
-        );
+                        "CommitID: \"decaf\"\n" + //
+                        "- Node: \"TEST\"\n" + //
+                        "  Message: \"test\"\n" + //
+                        "  ID: \"4711\"\n" + //
+                        "  PreVariables:\n" + //
+                        "  Children:\n" + //
+                        "  - Node: \"SPECIFICATION_STEP\"\n" + //
+                        "    Message: \"spec step\"\n" + //
+                        "    ID: \"4712\"\n" + //
+                        "    PreVariables:\n" + //
+                        "    Children:\n" + //
+                        "    - Node: \"COMPONENT\"\n" + //
+                        "      Message: \"component\"\n" + //
+                        "      ID: \"4713\"\n" + //
+                        "      PreVariables:\n" + //
+                        "      Children:\n" + //
+                        "      - Node: \"STEP\"\n" + //
+                        "        Message: \"step\"\n" + //
+                        "        ID: \"4714\"\n" + //
+                        "        PreVariables:\n" + //
+                        "        Children:\n" + //
+                        "        Status: \"OK\"\n" + //
+                        "        PostVariables:\n" + //
+                        "      - Node: \"STEP\"\n" + //
+                        "        Message: \"step\"\n" + //
+                        "        ID: \"4715\"\n" + //
+                        "        PreVariables:\n" + //
+                        "        Children:\n" + //
+                        "        Status: \"OK\"\n" + //
+                        "        PostVariables:\n" + //
+                        "      Status: \"OK\"\n" + //
+                        "      PostVariables:\n" + //
+                        "    Status: \"OK\"\n" + //
+                        "    PostVariables:\n" + //
+                        "  Status: \"OK\"\n" + //
+                        "  PostVariables:\n");
     }
-    
+
     @Test
     public void testYamlEnteredSomeLeftOnlyTestStatusOnlyOnTestNode() {
         // when
-        yamlCallTreeListenerUnderTest.reported(SemanticUnit.TEST, Action.ENTER, "test", "4711", "?", null);
-        yamlCallTreeListenerUnderTest.reported(SemanticUnit.SPECIFICATION_STEP, Action.ENTER, "spec step", "4712", "?", null);
-        yamlCallTreeListenerUnderTest.reported(SemanticUnit.COMPONENT, Action.ENTER, "component", "4713", "?", null);
-        yamlCallTreeListenerUnderTest.reported(SemanticUnit.STEP, Action.ENTER, "step", "4714", "?", null);
-        yamlCallTreeListenerUnderTest.reported(SemanticUnit.TEST, Action.LEAVE, "test", "4711", "FAILED", null);
-        
+        yamlCallTreeListenerUnderTest.reported(SemanticUnit.TEST, Action.ENTER, "test", "4711", Status.STARTED, null);
+        yamlCallTreeListenerUnderTest.reported(SemanticUnit.SPECIFICATION_STEP, Action.ENTER, "spec step", "4712",
+                Status.STARTED, null);
+        yamlCallTreeListenerUnderTest.reported(SemanticUnit.COMPONENT, Action.ENTER, "component", "4713",
+                Status.STARTED, null);
+        yamlCallTreeListenerUnderTest.reported(SemanticUnit.STEP, Action.ENTER, "step", "4714", Status.STARTED, null);
+        yamlCallTreeListenerUnderTest.reported(SemanticUnit.TEST, Action.LEAVE, "test", "4711", Status.ABORTED, null);
+
         // then
         assertOutputWithoutNanosToEqual( //
                 "Source: \"testcase\"\n" + //
-                "CommitID: \"decaf\"\n" + //
-                "- Node: \"TEST\"\n" + //
-                "  Message: \"test\"\n" + //
-                "  ID: \"4711\"\n" + //
-                "  PreVariables:\n" + //
-                "  Children:\n" + //
-                "  - Node: \"SPECIFICATION_STEP\"\n" + //
-                "    Message: \"spec step\"\n" + //
-                "    ID: \"4712\"\n" + //
-                "    PreVariables:\n" + //
-                "    Children:\n" + //
-                "    - Node: \"COMPONENT\"\n" + //
-                "      Message: \"component\"\n" + //
-                "      ID: \"4713\"\n" + //
-                "      PreVariables:\n" + //
-                "      Children:\n" + //
-                "      - Node: \"STEP\"\n" + //
-                "        Message: \"step\"\n" + //
-                "        ID: \"4714\"\n" + //
-                "        PreVariables:\n" + //
-                "        Children:\n" + //
-                "  Status: \"FAILED\"\n" + //
-                "  PostVariables:\n"
-        );
-        
+                        "CommitID: \"decaf\"\n" + //
+                        "- Node: \"TEST\"\n" + //
+                        "  Message: \"test\"\n" + //
+                        "  ID: \"4711\"\n" + //
+                        "  PreVariables:\n" + //
+                        "  Children:\n" + //
+                        "  - Node: \"SPECIFICATION_STEP\"\n" + //
+                        "    Message: \"spec step\"\n" + //
+                        "    ID: \"4712\"\n" + //
+                        "    PreVariables:\n" + //
+                        "    Children:\n" + //
+                        "    - Node: \"COMPONENT\"\n" + //
+                        "      Message: \"component\"\n" + //
+                        "      ID: \"4713\"\n" + //
+                        "      PreVariables:\n" + //
+                        "      Children:\n" + //
+                        "      - Node: \"STEP\"\n" + //
+                        "        Message: \"step\"\n" + //
+                        "        ID: \"4714\"\n" + //
+                        "        PreVariables:\n" + //
+                        "        Children:\n" + //
+                        "  Status: \"ABORTED\"\n" + //
+                        "  PostVariables:\n");
+
     }
 
     private void assertOutputContainsNoRegex(String expectedRegex) {

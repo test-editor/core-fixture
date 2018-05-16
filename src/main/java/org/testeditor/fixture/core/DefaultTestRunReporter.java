@@ -38,7 +38,7 @@ public class DefaultTestRunReporter implements TestRunReporter {
     private List<TestRunListener> listeners = new ArrayList<TestRunListener>();
 
     @Override
-    public void enter(SemanticUnit unit, String msg, String ID, String status, Map<String, String> variables) {
+    public void enter(SemanticUnit unit, String msg, String ID, Status status, Map<String, String> variables) {
         if (unit == SemanticUnit.TEST) {
             MDC.put("TestName", "TE-Test: " + msg.replaceAll("^.*\\.", ""));
         }
@@ -51,7 +51,7 @@ public class DefaultTestRunReporter implements TestRunReporter {
      * all other entered units are left!
      */
     @Override
-    public void leave(SemanticUnit unit, String msg, String ID, String status, Map<String, String> variables) {
+    public void leave(SemanticUnit unit, String msg, String ID, Status status, Map<String, String> variables) {
         informListeners(unit, Action.LEAVE, msg, ID, status, variables);
         
         if (unit == SemanticUnit.TEST) {
@@ -62,7 +62,7 @@ public class DefaultTestRunReporter implements TestRunReporter {
     /**
      * make sure that all registered listeners are informed, order is not guaranteed
      */
-    private void informListeners(SemanticUnit unit, Action action, String msg, String ID, String status, Map<String,String> variables) {
+    private void informListeners(SemanticUnit unit, Action action, String msg, String ID, Status status, Map<String,String> variables) {
         logListener.reported(unit, action, msg, ID, status, variables); // logListener is always reported to first!
         for (TestRunListener listener : listeners) {
             try {

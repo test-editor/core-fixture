@@ -1,3 +1,15 @@
+/*******************************************************************************
+ * Copyright (c) 2012 - 2018 Signal Iduna Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ * Signal Iduna Corporation - initial API and implementation
+ * akquinet AG
+ * itemis AG
+ *******************************************************************************/
 
 package org.testeditor.fixture.core;
 
@@ -15,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testeditor.fixture.core.TestRunReporter.Action;
 import org.testeditor.fixture.core.TestRunReporter.SemanticUnit;
+import org.testeditor.fixture.core.TestRunReporter.Status;
 
 public class DefaultYamlCallTreeListener implements TestRunListener {
 
@@ -32,7 +45,7 @@ public class DefaultYamlCallTreeListener implements TestRunListener {
         public String ID;
         public long nanoTimeEntered;
         public long nanoTimeLeft;
-        public String status;
+        public Status status;
         public int parentIndentation;
 
         public Node(SemanticUnit unit, String message, String ID) {
@@ -41,13 +54,13 @@ public class DefaultYamlCallTreeListener implements TestRunListener {
             this.ID = ID;
         }
 
-        public void enterNode(int parentIndentation, String status) {
-            this.parentIndentation = parentIndentation; 
+        public void enterNode(int parentIndentation, Status status) {
+            this.parentIndentation = parentIndentation;
             this.nanoTimeEntered = System.nanoTime();
             this.status = status;
         }
 
-        public void leaveNode(String status) {
+        public void leaveNode(Status status) {
             this.nanoTimeLeft = System.nanoTime();
             this.status = status;
         }
@@ -73,7 +86,8 @@ public class DefaultYamlCallTreeListener implements TestRunListener {
      */
 
     @Override
-    public void reported(SemanticUnit unit, Action action, String message, String ID, String status, Map<String, String> variables) {
+    public void reported(SemanticUnit unit, Action action, String message, String ID, Status status,
+            Map<String, String> variables) {
         switch (unit) {
             case TEST:
                 writeTestNode(action, message, ID, status, variables);
@@ -84,8 +98,9 @@ public class DefaultYamlCallTreeListener implements TestRunListener {
 
         }
     }
-    
-    private void writeNode(SemanticUnit unit, Action action, String message, String ID, String status, Map<String, String> variables) {
+
+    private void writeNode(SemanticUnit unit, Action action, String message, String ID, Status status,
+            Map<String, String> variables) {
         switch (action) {
             case ENTER:
                 enterNode(unit, message, ID, status, variables);
@@ -95,7 +110,7 @@ public class DefaultYamlCallTreeListener implements TestRunListener {
         }
     }
 
-    private void enterNode(SemanticUnit unit, String message, String ID, String status, Map<String, String> variables) {
+    private void enterNode(SemanticUnit unit, String message, String ID, Status status, Map<String, String> variables) {
         Node node = new Node(unit, message, ID);
         node.enterNode(currentIndentation, status);
         callTreeNodeMap.put(ID, node);
@@ -109,26 +124,26 @@ public class DefaultYamlCallTreeListener implements TestRunListener {
         try {
             outputStreamWriter.flush();
         } catch (IOException e) {
-            logger.error("flushing yaml call tree entry failed", e);            
+            logger.error("flushing yaml call tree entry failed", e);
         }
     }
-    
-    private void writeVariables(String prefix, Map<String,String> variables) {
-        writeString(prefix+"Variables", null);
-        if (variables != null ) {
+
+    private void writeVariables(String prefix, Map<String, String> variables) {
+        writeString(prefix + "Variables", null);
+        if (variables != null) {
             variables.entrySet().stream().forEach(keyVal -> {
                 writePrefixedString("-", StringEscapeUtils.escapeJava(keyVal.getKey()), keyVal.getValue());
             });
         }
     }
 
-    private void leaveNode(String ID, String status, Map<String, String> variables) {
+    private void leaveNode(String ID, Status status, Map<String, String> variables) {
         Node node = callTreeNodeMap.get(ID);
-        if (node != null) {            
+        if (node != null) {
             node.leaveNode(status);
             currentIndentation = node.parentIndentation + YAML_INDENTIATION;
             writeString("Leave", Long.toString(node.nanoTimeLeft));
-            writeString("Status", status);
+            writeString("Status", status.toString());
             writeVariables("Post", variables);
             try {
                 outputStreamWriter.flush();
@@ -141,7 +156,7 @@ public class DefaultYamlCallTreeListener implements TestRunListener {
         currentIndentation -= YAML_INDENTIATION;
     }
 
-    private void writeTestNode(Action action, String message, String ID, String status, Map<String,String> variables) {
+    private void writeTestNode(Action action, String message, String ID, Status status, Map<String, String> variables) {
         try {
             switch (action) {
                 case ENTER:

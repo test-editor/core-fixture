@@ -20,12 +20,13 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Marks a method as being a fixture method, i.e. it can be called from the outside in order to interact with the 
- * application under test.
+ * Marks a method as being a fixture method, i.e. it can be called from the
+ * outside in order to interact with the application under test.
  * <p>
- * The method is not marked as @Inherited since a subclass may want to hide inherited fixture methods from the user. 
- * In this case it could simply override the inherited method and <strong>not</strong> annotate it. In this case, 
- * the tooling should not display the method.
+ * The method is not marked as @Inherited since a subclass may want to hide
+ * inherited fixture methods from the user. In this case it could simply
+ * override the inherited method and <strong>not</strong> annotate it. In this
+ * case, the tooling should not display the method.
  * </p>
  */
 @Target(ElementType.METHOD)
