@@ -25,29 +25,29 @@ import org.testeditor.fixture.core.TestRunReporter.Status;
 
 /**
  * Class from which all generated unit tests are (transitively) derived
- * 
+ *
  * Every generated unit test class inherits (transitively in case of configs)
  * from this abstract test class! Every generated class makes use of the
  * interface of this class:
- * 
+ *
  * <pre>
  * - calls to the reporter are generated (to report current test status)
- * - newVarId s are generated to hold call tree ids used for enter/leave 
- *   reporting 
- * - initializsation/cleanup of junit 
+ * - newVarId s are generated to hold call tree ids used for enter/leave
+ *   reporting
+ * - initializsation/cleanup of junit
  * - finishTestWith to inform the test of the final status
  * </pre>
  */
 public class AbstractTestCase {
     // reporter for current test status, register with this reported for addition listeners
-    protected final TestRunReporter reporter; 
+    protected final TestRunReporter reporter;
     // a number that is used to generate variables, holding call tree ids (used for enter/leave reporting)
-    private long runningNumber; 
+    private long runningNumber;
     // (probably an) assertion error if test is not finished as expected
-    private Status finalStatus = Status.ERROR; 
+    private Status finalStatus = Status.ERROR;
 
     /**
-     * default ctor
+     * default constructor
      */
     public AbstractTestCase() {
         // initialization is done in ctor to allow other ctors to access reporter
@@ -80,7 +80,7 @@ public class AbstractTestCase {
     /**
      * Call this method with the real test result status, before finishing the
      * execute test method!
-     * 
+     *
      * @param status
      */
     protected void finishedTestWith(Status status) {
@@ -100,7 +100,7 @@ public class AbstractTestCase {
 
     /**
      * utility builder function to pass varable-names and values as hashmap
-     * 
+     *
      * @param strings make sure there is an even number of parameters used, since
      *            only the first even numbered parameters are packed into the map
      * @return
