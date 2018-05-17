@@ -33,11 +33,14 @@ public class DefaultYamlCallTreeListener implements TestRunListener {
 
     protected static final Logger logger = LoggerFactory.getLogger(DefaultYamlCallTreeListener.class);
 
-    public static final int YAML_INDENTIATION = 2;
+    public static final int YAML_INDENTATION = 2;
 
     protected Map<String, Node> callTreeNodeMap = new HashMap<>();
     protected String testCaseSource;
     protected String commitId;
+    protected OutputStreamWriter outputStreamWriter;
+    private int currentIndentation = YAML_INDENTATION;
+
 
     protected static class Node {
         public SemanticUnit unit;
@@ -66,9 +69,6 @@ public class DefaultYamlCallTreeListener implements TestRunListener {
         }
 
     }
-
-    protected OutputStreamWriter outputStreamWriter;
-    int currentIndentation = 0;
 
     /**
      * Ctor
@@ -127,24 +127,35 @@ public class DefaultYamlCallTreeListener implements TestRunListener {
         node.enterNode(currentIndentation, status);
         callTreeNodeMap.put(id, node);
         writePrefixedString("-", "Node", unit.toString());
-        currentIndentation += YAML_INDENTIATION;
+        increaseIndentation();
         writeString("Message", node.message);
         writeString("ID", node.id);
         writeString("Enter", Long.toString(node.nanoTimeEntered));
         writeVariables("Pre", variables);
-        writeString("Children", null);
+        writeString("Children");
         try {
             outputStreamWriter.flush();
         } catch (IOException e) {
             logger.error("flushing yaml call tree entry failed", e);
         }
     }
+    
+    private void increaseIndentation() {
+        currentIndentation += YAML_INDENTATION;
+    }
+    
+    private void decreaseIndentation() {
+        currentIndentation -= YAML_INDENTATION;
+    }
 
     private void writeVariables(String prefix, Map<String, String> variables) {
-        writeString(prefix + "Variables", null);
+        writeString(prefix + "Variables");
         if (variables != null) {
             variables.entrySet().stream().forEach(keyVal -> {
-                writePrefixedString("-", StringEscapeUtils.escapeJava(keyVal.getKey()), keyVal.getValue());
+                writePrefixedString("-", "Key", keyVal.getKey());
+                increaseIndentation();
+                writeString("Value", keyVal.getValue());
+                decreaseIndentation();
             });
         }
     }
@@ -153,7 +164,8 @@ public class DefaultYamlCallTreeListener implements TestRunListener {
         Node node = callTreeNodeMap.get(id);
         if (node != null) {
             node.leaveNode(status);
-            currentIndentation = node.parentIndentation + YAML_INDENTIATION;
+            currentIndentation = node.parentIndentation;
+            increaseIndentation();
             writeString("Leave", Long.toString(node.nanoTimeLeft));
             writeString("Status", status.toString());
             writeVariables("Post", variables);
@@ -165,7 +177,7 @@ public class DefaultYamlCallTreeListener implements TestRunListener {
         } else {
             logger.error("Left unknown node with ID '" + StringEscapeUtils.escapeJava(id) + "'");
         }
-        currentIndentation -= YAML_INDENTIATION;
+        decreaseIndentation();
     }
 
     private void writeTestNode(Action action, String message, String id, Status status, Map<String, String> variables) {
@@ -175,6 +187,7 @@ public class DefaultYamlCallTreeListener implements TestRunListener {
                     writeString("Source", testCaseSource);
                     writeString("CommitID", commitId);
                     writeString("Started", Instant.now().toString());
+                    writeString("Children");
                     enterNode(SemanticUnit.TEST, message, id, status, variables);
                     break;
                 case LEAVE:
@@ -196,6 +209,10 @@ public class DefaultYamlCallTreeListener implements TestRunListener {
         } catch (Exception e) {
             logger.error("writing yaml call tree entry failed", e);
         }
+    }
+    
+    private void writeString(String attribute) {
+        writeString(attribute, null);
     }
 
     private void writeString(String attribute, String value) {

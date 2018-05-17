@@ -43,20 +43,23 @@ public class TestDefaultYamlCallTreeListener {
     public void testYamlOfEnteredTest() throws IOException {
         // when
         yamlCallTreeListenerUnderTest.reported(SemanticUnit.TEST, Action.ENTER, "test", "4711", Status.STARTED,
-                AbstractTestCase.variables("a", "5", "b", "7"));
+                AbstractTestCase.variables("a.\"my key\"", "5'\");System.exit(1);", "b", "7"));
 
         // then
         assertOutputWithoutNanosToEqual(//
-                "Source: \"testcase\"\n" + //
-                        "CommitID: \"decaf\"\n" + //
-                        "- Node: \"TEST\"\n" + //
-                        "  Message: \"test\"\n" + //
-                        "  ID: \"4711\"\n" + //
-                        "  PreVariables:\n" + //
-                        "  - a: \"5\"\n" + //
-                        "  - b: \"7\"\n" + //
-                        "  Children:\n");
-        assertOutputContainsRegex("(?s).*\n  Enter: \"[0-9]+\"\n.*");
+                "  Source: \"testcase\"\n" + //
+                        "  CommitID: \"decaf\"\n" + //
+                        "  Children:\n" + //
+                        "  - Node: \"TEST\"\n" + //
+                        "    Message: \"test\"\n" + //
+                        "    ID: \"4711\"\n" + //
+                        "    PreVariables:\n" + //
+                        "    - Key: \"b\"\n" + //
+                        "      Value: \"7\"\n" + //
+                        "    - Key: \"a.\\\"my key\\\"\"\n" + //
+                        "      Value: \"5'\\\");System.exit(1);\"\n" + //
+                        "    Children:\n");
+        assertOutputContainsRegex("(?s).*\n    Enter: \"[0-9]+\"\n.*");
         assertOutputContainsNoRegex("(?s).*Leave:.*");
     }
 
@@ -69,19 +72,22 @@ public class TestDefaultYamlCallTreeListener {
 
         // then
         assertOutputWithoutNanosToEqual(//
-                "Source: \"testcase\"\n" + //
-                        "CommitID: \"decaf\"\n" + //
-                        "- Node: \"TEST\"\n" + //
-                        "  Message: \"test\"\n" + //
-                        "  ID: \"4711\"\n" + //
-                        "  PreVariables:\n" + //
+                "  Source: \"testcase\"\n" + //
+                        "  CommitID: \"decaf\"\n" + //
                         "  Children:\n" + //
-                        "  Status: \"OK\"\n" + //
-                        "  PostVariables:\n" + //
-                        "  - a: \"5\"\n" + //
-                        "  - b: \"7\"\n");
-        assertOutputContainsRegex("(?s).*\n  Enter: \"[0-9]+\"\n.*");
-        assertOutputContainsRegex("(?s).*\n  Leave: \"[0-9]+\"\n.*");
+                        "  - Node: \"TEST\"\n" + //
+                        "    Message: \"test\"\n" + //
+                        "    ID: \"4711\"\n" + //
+                        "    PreVariables:\n" + //
+                        "    Children:\n" + //
+                        "    Status: \"OK\"\n" + //
+                        "    PostVariables:\n" + //
+                        "    - Key: \"a\"\n" + //
+                        "      Value: \"5\"\n" + //
+                        "    - Key: \"b\"\n" + //
+                        "      Value: \"7\"\n"); 
+        assertOutputContainsRegex("(?s).*\n    Enter: \"[0-9]+\"\n.*");
+        assertOutputContainsRegex("(?s).*\n    Leave: \"[0-9]+\"\n.*");
     }
 
     @Test
@@ -104,43 +110,44 @@ public class TestDefaultYamlCallTreeListener {
 
         // then
         assertOutputWithoutNanosToEqual(//
-                "Source: \"testcase\"\n" + //
-                        "CommitID: \"decaf\"\n" + //
-                        "- Node: \"TEST\"\n" + //
-                        "  Message: \"test\"\n" + //
-                        "  ID: \"4711\"\n" + //
-                        "  PreVariables:\n" + //
+                "  Source: \"testcase\"\n" + //
+                        "  CommitID: \"decaf\"\n" + //
                         "  Children:\n" + //
-                        "  - Node: \"SPECIFICATION_STEP\"\n" + //
-                        "    Message: \"spec step\"\n" + //
-                        "    ID: \"4712\"\n" + //
+                        "  - Node: \"TEST\"\n" + //
+                        "    Message: \"test\"\n" + //
+                        "    ID: \"4711\"\n" + //
                         "    PreVariables:\n" + //
                         "    Children:\n" + //
-                        "    - Node: \"COMPONENT\"\n" + //
-                        "      Message: \"component\"\n" + //
-                        "      ID: \"4713\"\n" + //
+                        "    - Node: \"SPECIFICATION_STEP\"\n" + //
+                        "      Message: \"spec step\"\n" + //
+                        "      ID: \"4712\"\n" + //
                         "      PreVariables:\n" + //
                         "      Children:\n" + //
-                        "      - Node: \"STEP\"\n" + //
-                        "        Message: \"step\"\n" + //
-                        "        ID: \"4714\"\n" + //
+                        "      - Node: \"COMPONENT\"\n" + //
+                        "        Message: \"component\"\n" + //
+                        "        ID: \"4713\"\n" + //
                         "        PreVariables:\n" + //
                         "        Children:\n" + //
-                        "        Status: \"OK\"\n" + //
-                        "        PostVariables:\n" + //
-                        "      - Node: \"STEP\"\n" + //
-                        "        Message: \"step\"\n" + //
-                        "        ID: \"4715\"\n" + //
-                        "        PreVariables:\n" + //
-                        "        Children:\n" + //
+                        "        - Node: \"STEP\"\n" + //
+                        "          Message: \"step\"\n" + //
+                        "          ID: \"4714\"\n" + //
+                        "          PreVariables:\n" + //
+                        "          Children:\n" + //
+                        "          Status: \"OK\"\n" + //
+                        "          PostVariables:\n" + //
+                        "        - Node: \"STEP\"\n" + //
+                        "          Message: \"step\"\n" + //
+                        "          ID: \"4715\"\n" + //
+                        "          PreVariables:\n" + //
+                        "          Children:\n" + //
+                        "          Status: \"OK\"\n" + //
+                        "          PostVariables:\n" + //
                         "        Status: \"OK\"\n" + //
                         "        PostVariables:\n" + //
                         "      Status: \"OK\"\n" + //
                         "      PostVariables:\n" + //
                         "    Status: \"OK\"\n" + //
-                        "    PostVariables:\n" + //
-                        "  Status: \"OK\"\n" + //
-                        "  PostVariables:\n");
+                        "    PostVariables:\n");
     }
 
     @Test
@@ -156,30 +163,31 @@ public class TestDefaultYamlCallTreeListener {
 
         // then
         assertOutputWithoutNanosToEqual(//
-                "Source: \"testcase\"\n" + //
-                        "CommitID: \"decaf\"\n" + //
-                        "- Node: \"TEST\"\n" + //
-                        "  Message: \"test\"\n" + //
-                        "  ID: \"4711\"\n" + //
-                        "  PreVariables:\n" + //
+                "  Source: \"testcase\"\n" + //
+                        "  CommitID: \"decaf\"\n" + //
                         "  Children:\n" + //
-                        "  - Node: \"SPECIFICATION_STEP\"\n" + //
-                        "    Message: \"spec step\"\n" + //
-                        "    ID: \"4712\"\n" + //
+                        "  - Node: \"TEST\"\n" + //
+                        "    Message: \"test\"\n" + //
+                        "    ID: \"4711\"\n" + //
                         "    PreVariables:\n" + //
                         "    Children:\n" + //
-                        "    - Node: \"COMPONENT\"\n" + //
-                        "      Message: \"component\"\n" + //
-                        "      ID: \"4713\"\n" + //
+                        "    - Node: \"SPECIFICATION_STEP\"\n" + //
+                        "      Message: \"spec step\"\n" + //
+                        "      ID: \"4712\"\n" + //
                         "      PreVariables:\n" + //
                         "      Children:\n" + //
-                        "      - Node: \"STEP\"\n" + //
-                        "        Message: \"step\"\n" + //
-                        "        ID: \"4714\"\n" + //
+                        "      - Node: \"COMPONENT\"\n" + //
+                        "        Message: \"component\"\n" + //
+                        "        ID: \"4713\"\n" + //
                         "        PreVariables:\n" + //
                         "        Children:\n" + //
-                        "  Status: \"ABORTED\"\n" + //
-                        "  PostVariables:\n");
+                        "        - Node: \"STEP\"\n" + //
+                        "          Message: \"step\"\n" + //
+                        "          ID: \"4714\"\n" + //
+                        "          PreVariables:\n" + //
+                        "          Children:\n" + //
+                        "    Status: \"ABORTED\"\n" + //
+                        "    PostVariables:\n");
 
     }
 
