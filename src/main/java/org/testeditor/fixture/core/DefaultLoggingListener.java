@@ -110,20 +110,20 @@ public class DefaultLoggingListener implements TestRunListener {
     private void logUnit(String unitText, Action action, String message, String id, Status status) {
         switch (action) {
             case ENTER:
-                logger.trace(indentPrefix() + ">{}[{}]> {}, Status={}", unitText, id, message, status);
+                logger.trace(indentPrefix() + "->{}[{}] {} [Status={}]", unitText, id, message, status);
                 break;
             case LEAVE:
-                logger.trace(indentPrefix() + "<{}[{}]< {}, Status={}", unitText, id, message, status);
+                logger.trace(indentPrefix() + "<-{}[{}] {} [Status={}]", unitText, id, message, status);
                 break;
-            default: 
+            default:
                 // do nothing
                 break;
         }
     }
 
     private void logTechnicalReference(SemanticUnit unit, Action action, String message, String id) {
-        logger.info("@" + unit.toString() + ":" + action.toString() + ":" + Integer.toHexString(message.hashCode())
-                + ":" + id + "  <-- DO NOT REMOVE, NEEDED FOR REFERENCING");
+        logger.info(indentPrefix() + "@" + unit.toString() + ":" + action.toString() + ":"
+                + Integer.toHexString(message.hashCode()) + ":" + id);
     }
 
 }
