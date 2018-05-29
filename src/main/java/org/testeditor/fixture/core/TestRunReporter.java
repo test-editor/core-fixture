@@ -50,6 +50,12 @@ public interface TestRunReporter {
      * called by test execution to indicate that unit x Action.LEAVE is executed
      */
     void leave(SemanticUnit unit, String msg, String id, Status status, Map<String, String> variableParameters);
+    
+    void fixtureExit(FixtureException fixtureException);
+
+    void exceptionExit(Exception exception);
+
+    void assertionExit(AssertionError assertionError);
 
     /** listen to any action */
     void addListener(TestRunListener listener);

@@ -64,27 +64,100 @@ public class DefaultTestRunReporter implements TestRunReporter {
      */
     private void informListeners(SemanticUnit unit, Action action, String msg, String id, Status status,
             Map<String, String> variables) {
-        logListener.reported(unit, action, msg, id, status, variables); // logListener is always reported to first!
+        try {
+            logListener.reported(unit, action, msg, id, status, variables); // logListener is always reported to first!
+        } catch (Exception e) {
+            logger.warn("Log Listener " + logListener.getClass().getName() + " threw an exception processing unit='"
+                    + unit + "', action='" + action + "', msg='" + msg + "'.", e);
+        }
         for (TestRunListener listener : listeners) {
             try {
                 // make sure that an exception is handled gracefully, so that
                 // other listeners are informed, too
                 listener.reported(unit, action, msg, id, status, variables);
             } catch (Exception e) {
-                logger.warn("Listener threw an exception processing unit='" + unit + "', action='" + action + "', msg='"
-                        + msg + "'.", e);
+                logger.warn("Listener " + listener.getClass().getName() + " threw an exception processing unit='" + unit
+                        + "', action='" + action + "', msg='" + msg + "'.", e);
             }
         }
     }
 
     @Override
     public void addListener(TestRunListener listener) {
-        listeners.add(listener);
+        if (listener != null) {
+            listeners.add(listener);
+        } else {
+            logger.warn("Cannot add listener that is NULL!");
+        }
     }
 
     @Override
     public void removeListener(TestRunListener listener) {
         listeners.remove(listener);
+    }
+
+    @Override
+    public void fixtureExit(FixtureException fixtureException) {
+        try {
+            logListener.reportFixtureExit(fixtureException); // logListener is always reported to first!
+        } catch (Exception e) {
+            logger.warn(
+                    "Log listener '" + logListener.getClass().getName() + "' threw an exception reporting fixture exit",
+                    e);
+        }
+        for (TestRunListener listener : listeners) {
+            try {
+                // make sure that an exception is handled gracefully, so that
+                // other listeners are informed, too
+                listener.reportFixtureExit(fixtureException);
+            } catch (Exception e) {
+                logger.warn(
+                        "Listener '" + listener.getClass().getName() + "' threw an exception reporting fixture exit",
+                        e);
+            }
+        }
+    }
+
+    @Override
+    public void exceptionExit(Exception exception) {
+        try {
+            logListener.reportExceptionExit(exception); // logListener is always reported to first!
+        } catch (Exception e) {
+            logger.warn("Log listener '" + logListener.getClass().getName()
+                    + "' threw an exception reporting exception exit", e);
+        }
+        for (TestRunListener listener : listeners) {
+            try {
+                // make sure that an exception is handled gracefully, so that
+                // other listeners are informed, too
+                listener.reportExceptionExit(exception);
+            } catch (Exception e) {
+                logger.warn(
+                        "Listener '" + listener.getClass().getName() + "' threw an exception reporting exception exit",
+                        e);
+            }
+        }
+    }
+
+    @Override
+    public void assertionExit(AssertionError assertionError) {
+        try {
+            logListener.reportAssertionExit(assertionError); // logListener is always reported to first!
+        } catch (Exception e) {
+            logger.warn("Log listener '" + logListener.getClass().getName()
+                    + "' threw an exception reporting assertion exit", e);
+        }
+        for (TestRunListener listener : listeners) {
+            try {
+                // make sure that an exception is handled gracefully, so that
+                // other listeners are informed, too
+                listener.reportAssertionExit(assertionError);
+            } catch (Exception e) {
+                logger.warn(
+                        "Listener '" + listener.getClass().getName() + "' threw an exception reporting assertion exit",
+                        e);
+            }
+        }
     }
 
 }

@@ -23,4 +23,11 @@ import org.testeditor.fixture.core.TestRunReporter.Status;
 public interface TestRunListener {
     void reported(TestRunReporter.SemanticUnit unit, TestRunReporter.Action action, String message, String id,
             Status status, Map<String, String> variables);
+
+    void reportFixtureExit(FixtureException fixtureException);
+
+    void reportExceptionExit(Exception exception);
+
+    void reportAssertionExit(AssertionError assertionError);
+
 }
