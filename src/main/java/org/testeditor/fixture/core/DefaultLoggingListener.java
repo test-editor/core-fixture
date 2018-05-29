@@ -126,4 +126,19 @@ public class DefaultLoggingListener implements TestRunListener {
                 + Integer.toHexString(message.hashCode()) + ":" + id);
     }
 
+    @Override
+    public void reportFixtureExit(FixtureException fixtureException) {
+        logger.error("FixtureException", fixtureException);
+    }
+
+    @Override
+    public void reportExceptionExit(Exception exception) {
+        logger.error("Exception", exception);
+    }
+
+    @Override
+    public void reportAssertionExit(AssertionError assertionError) {
+        logger.error("AssertionError: " + assertionError.getLocalizedMessage(), assertionError);
+    }
+
 }
