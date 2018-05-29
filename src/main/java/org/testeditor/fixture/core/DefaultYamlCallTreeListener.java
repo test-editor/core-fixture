@@ -107,6 +107,24 @@ public class DefaultYamlCallTreeListener implements TestRunListener {
         }
     }
 
+    @Override
+    public void reportFixtureExit(FixtureException fixtureException) {
+        dispatchingWrite("FixtureException", fixtureException.getKeyValueStore());
+        flush();
+    }
+
+    @Override
+    public void reportExceptionExit(Exception exception) {
+        dispatchingWrite("Exception", exception.getLocalizedMessage());
+        flush();
+    }
+
+    @Override
+    public void reportAssertionExit(AssertionError assertionError) {
+        dispatchingWrite("AssertionError", assertionError.getLocalizedMessage());
+        flush();
+    }
+
     private void writeNode(SemanticUnit unit, Action action, String message, String id, Status status,
             Map<String, String> variables) {
         switch (action) {
@@ -186,65 +204,6 @@ public class DefaultYamlCallTreeListener implements TestRunListener {
         }
     }
 
-    private void writePrefixedString(String prefix, String attribute, String value) {
-        try {
-            outputStreamWriter.write(StringUtils.repeat(' ', currentIndentation));
-            writeUnindentedString(prefix + " ", attribute, value);
-        } catch (Exception e) {
-            logger.error("writing yaml call tree entry failed", e);
-        }
-    }
-
-    private void writeString(String attribute) {
-        writeString(attribute, null);
-    }
-
-    private void writeString(String attribute, String value) {
-        try {
-            outputStreamWriter.write(StringUtils.repeat(' ', currentIndentation));
-            writeUnindentedString("", attribute, value);
-        } catch (Exception e) {
-            logger.error("writing yaml call tree entry failed", e);
-        }
-    }
-
-    private void writeUnindentedString(String prefix, String attribute, String value) {
-        try {
-            outputStreamWriter.write(prefix);
-            if (!attribute.equals("-")) {
-                String escapedAttribute = StringEscapeUtils.escapeJava(attribute);
-                outputStreamWriter.write("\"" + escapedAttribute + "\":");
-            } else {
-                outputStreamWriter.write(attribute);
-            }
-            if (value != null) {
-                String escapedValue = StringEscapeUtils.escapeJava(value);
-                outputStreamWriter.write(" \"" + escapedValue + "\"");
-            }
-            outputStreamWriter.write("\n");
-        } catch (Exception e) {
-            logger.error("writing yaml call tree entry failed", e);
-        }
-    }
-
-    @Override
-    public void reportFixtureExit(FixtureException fixtureException) {
-        dispatchingWrite("FixtureException", fixtureException.getKeyValueStore());
-        flush();
-    }
-
-    @Override
-    public void reportExceptionExit(Exception exception) {
-        dispatchingWrite("Exception", exception.getLocalizedMessage());
-        flush();
-    }
-
-    @Override
-    public void reportAssertionExit(AssertionError assertionError) {
-        dispatchingWrite("AssertionError", assertionError.getLocalizedMessage());
-        flush();
-    }
-
     private void writeMap(Map<String, Object> keyValue) {
         keyValue.keySet().stream().forEach(key -> {
             dispatchingWrite(key, keyValue.get(key));
@@ -265,7 +224,7 @@ public class DefaultYamlCallTreeListener implements TestRunListener {
         }
     }
 
-    private void dispatchingWritePrefixed(String prefix, String attribute, Object object) {
+    private void writeAttributePrefixed(String prefix, String attribute) {
         try {
             outputStreamWriter.write(StringUtils.repeat(' ', currentIndentation));
             if ((prefix != null) && (!prefix.isEmpty())) {
@@ -277,33 +236,38 @@ public class DefaultYamlCallTreeListener implements TestRunListener {
             } else {
                 outputStreamWriter.write(attribute);
             }
-            if (object instanceof ArrayList) {
-                writeNL();
-                increaseIndentation();
-                writeArray((ArrayList<Object>) object);
-                decreaseIndentation();
-            } else if (object instanceof Map) {
-                writeNL();
-                increaseIndentation();
-                writeMap((Map<String, Object>) object);
-                decreaseIndentation();
-            } else if (object instanceof String) {
-                outputStreamWriter.write(" ");
-                writeStringObject((String) object);
-                writeNL();
-            } else if (object instanceof Number) {
-                outputStreamWriter.write(" ");
-                writeNumber((Number) object);
-                writeNL();
-            } else if (object != null) {
-                outputStreamWriter.write(" ");
-                writeStringObject(object.toString());
-                writeNL();
-            } else {
-                writeNL();
-            }
-        } catch (Exception e) {
-            logger.error("writing yaml call tree entry failed", e);
+        } catch (IOException e) {
+            logger.error("writing prefixed attribute", e);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void dispatchingWritePrefixed(String prefix, String attribute, Object object) {
+        writeAttributePrefixed(prefix, attribute);
+        if (object instanceof ArrayList) {
+            writeNewLine();
+            increaseIndentation();
+            writeArray((ArrayList<Object>) object);
+            decreaseIndentation();
+        } else if (object instanceof Map) {
+            writeNewLine();
+            increaseIndentation();
+            writeMap((Map<String, Object>) object);
+            decreaseIndentation();
+        } else if (object instanceof String) {
+            writeSpace();
+            writeStringObject((String) object);
+            writeNewLine();
+        } else if (object instanceof Number) {
+            writeSpace();
+            writeNumber((Number) object);
+            writeNewLine();
+        } else if (object != null) {
+            writeSpace();
+            writeStringObject(object.toString());
+            writeNewLine();
+        } else {
+            writeNewLine();
         }
     }
 
@@ -311,15 +275,43 @@ public class DefaultYamlCallTreeListener implements TestRunListener {
         dispatchingWritePrefixed("", attribute, object);
     }
 
-    private void writeStringObject(String string) throws IOException {
-        if (string != null) {
-            String escapedValue = StringEscapeUtils.escapeJava(string);
-            outputStreamWriter.write("\"" + escapedValue + "\"");
+    private void writeStringObject(String string) {
+        try {
+            if (string != null) {
+                String escapedValue = StringEscapeUtils.escapeJava(string);
+                outputStreamWriter.write("\"" + escapedValue + "\"");
+            }
+        } catch (IOException e) {
+            logger.error("writing string object failed", e);
         }
     }
 
-    private void writeNL() throws IOException {
-        outputStreamWriter.write("\n");
+    private void writePrefixedString(String prefix, String attribute, String value) {
+        dispatchingWritePrefixed(prefix, attribute, value);
+    }
+
+    private void writeString(String attribute) {
+        writeString(attribute, null);
+    }
+
+    private void writeString(String attribute, String value) {
+        dispatchingWrite(attribute, value);
+    }
+
+    private void writeNewLine() {
+        try {
+            outputStreamWriter.write("\n");
+        } catch (IOException e) {
+            logger.error("writing new line failed", e);
+        }
+    }
+
+    private void writeSpace() {
+        try {
+            outputStreamWriter.write(" ");
+        } catch (IOException e) {
+            logger.error("writing space failed", e);
+        }
     }
 
     private void flush() {
@@ -329,4 +321,5 @@ public class DefaultYamlCallTreeListener implements TestRunListener {
             logger.error("flushing yaml call tree entry failed", e);
         }
     }
+
 }

@@ -207,8 +207,6 @@ public class TestDefaultYamlCallTreeListener {
     @Test
     public void testYamlOnFixtureException() {
         // given
-        Map<String, Object> keyValueStore = new HashMap<>();
-
         Map<String, Object> someMap = new HashMap<>();
         someMap.put("a map key to long", new Long(42));
         someMap.put("keyToString", "someString");
@@ -230,6 +228,7 @@ public class TestDefaultYamlCallTreeListener {
         someArray.add(new Long(44));
         someArray.add("lllaaa");
 
+        Map<String, Object> keyValueStore = new HashMap<>();
         keyValueStore.put("a Map", someMap);
         keyValueStore.put("an Array", someArray);
         keyValueStore.put("an Number", new Long(100));
