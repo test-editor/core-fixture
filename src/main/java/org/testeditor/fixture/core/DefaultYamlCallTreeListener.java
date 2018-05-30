@@ -109,19 +109,19 @@ public class DefaultYamlCallTreeListener implements TestRunListener {
 
     @Override
     public void reportFixtureExit(FixtureException fixtureException) {
-        dispatchingWrite("FixtureException", fixtureException.getKeyValueStore());
+        dispatchingWrite("fixtureException", fixtureException.getKeyValueStore());
         flush();
     }
 
     @Override
     public void reportExceptionExit(Exception exception) {
-        dispatchingWrite("Exception", exception.getLocalizedMessage());
+        dispatchingWrite("exception", exception.getLocalizedMessage());
         flush();
     }
 
     @Override
     public void reportAssertionExit(AssertionError assertionError) {
-        dispatchingWrite("AssertionError", assertionError.getLocalizedMessage());
+        dispatchingWrite("assertionError", assertionError.getLocalizedMessage());
         flush();
     }
 
@@ -144,13 +144,13 @@ public class DefaultYamlCallTreeListener implements TestRunListener {
         Node node = new Node(unit, message, id);
         node.enterNode(currentIndentation, status);
         callTreeNodeMap.put(id, node);
-        writePrefixedString("-", "Node", unit.toString());
+        writePrefixedString("-", "node", unit.toString());
         increaseIndentation();
-        writeString("Message", node.message);
-        writeString("ID", node.id);
-        writeString("Enter", Long.toString(node.nanoTimeEntered));
-        writeVariables("Pre", variables);
-        writeString("Children");
+        writeString("message", node.message);
+        writeString("id", node.id);
+        writeString("enter", Long.toString(node.nanoTimeEntered));
+        writeVariables("pre", variables);
+        writeString("children");
         flush();
     }
 
@@ -172,9 +172,9 @@ public class DefaultYamlCallTreeListener implements TestRunListener {
             node.leaveNode(status);
             currentIndentation = node.parentIndentation;
             increaseIndentation();
-            writeString("Leave", Long.toString(node.nanoTimeLeft));
-            writeString("Status", status.toString());
-            writeVariables("Post", variables);
+            writeString("leave", Long.toString(node.nanoTimeLeft));
+            writeString("status", status.toString());
+            writeVariables("post", variables);
             flush();
         } else {
             logger.error("Left unknown node with ID '" + StringEscapeUtils.escapeJava(id) + "'");
@@ -186,10 +186,10 @@ public class DefaultYamlCallTreeListener implements TestRunListener {
         try {
             switch (action) {
                 case ENTER:
-                    writeString("Source", testCaseSource);
-                    writeString("CommitID", commitId);
-                    writeString("Started", Instant.now().toString());
-                    writeString("Children");
+                    writeString("source", testCaseSource);
+                    writeString("commitId", commitId);
+                    writeString("started", Instant.now().toString());
+                    writeString("children");
                     enterNode(SemanticUnit.TEST, message, id, status, variables);
                     break;
                 case LEAVE:
