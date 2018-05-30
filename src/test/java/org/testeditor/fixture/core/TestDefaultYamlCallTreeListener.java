@@ -53,18 +53,18 @@ public class TestDefaultYamlCallTreeListener {
 
         // then
         assertOutputWithoutNanosToEqual(//
-                "  \"Source\": \"testcase\"\n" + //
-                        "  \"CommitID\": \"decaf\"\n" + //
-                        "  \"Children\":\n" + //
-                        "  - \"Node\": \"TEST\"\n" + //
-                        "    \"Message\": \"test\"\n" + //
-                        "    \"ID\": \"4711\"\n" + //
-                        "    \"PreVariables\":\n" + //
+                "  \"source\": \"testcase\"\n" + //
+                        "  \"commitId\": \"decaf\"\n" + //
+                        "  \"children\":\n" + //
+                        "  - \"node\": \"TEST\"\n" + //
+                        "    \"message\": \"test\"\n" + //
+                        "    \"id\": \"4711\"\n" + //
+                        "    \"preVariables\":\n" + //
                         "      \"b\": \"7\"\n" + //
                         "      \"a.\\\"my key\\\"\": \"5'\\\");System.exit(1);\"\n" + //
-                        "    \"Children\":\n");
-        assertOutputContainsRegex("(?s).*\n    \"Enter\": \"[0-9]+\"\n.*");
-        assertOutputContainsNoRegex("(?s).*\"Leave\":.*");
+                        "    \"children\":\n");
+        assertOutputContainsRegex("(?s).*\n    \"enter\": \"[0-9]+\"\n.*");
+        assertOutputContainsNoRegex("(?s).*\"leave\":.*");
     }
 
     @Test
@@ -76,20 +76,20 @@ public class TestDefaultYamlCallTreeListener {
 
         // then
         assertOutputWithoutNanosToEqual(//
-                "  \"Source\": \"testcase\"\n" + //
-                        "  \"CommitID\": \"decaf\"\n" + //
-                        "  \"Children\":\n" + //
-                        "  - \"Node\": \"TEST\"\n" + //
-                        "    \"Message\": \"test\"\n" + //
-                        "    \"ID\": \"4711\"\n" + //
-                        "    \"PreVariables\":\n" + //
-                        "    \"Children\":\n" + //
-                        "    \"Status\": \"OK\"\n" + //
-                        "    \"PostVariables\":\n" + //
+                "  \"source\": \"testcase\"\n" + //
+                        "  \"commitId\": \"decaf\"\n" + //
+                        "  \"children\":\n" + //
+                        "  - \"node\": \"TEST\"\n" + //
+                        "    \"message\": \"test\"\n" + //
+                        "    \"id\": \"4711\"\n" + //
+                        "    \"preVariables\":\n" + //
+                        "    \"children\":\n" + //
+                        "    \"status\": \"OK\"\n" + //
+                        "    \"postVariables\":\n" + //
                         "      \"a\": \"5\"\n" + //
                         "      \"b\": \"7\"\n");
-        assertOutputContainsRegex("(?s).*\n    \"Enter\": \"[0-9]+\"\n.*");
-        assertOutputContainsRegex("(?s).*\n    \"Leave\": \"[0-9]+\"\n.*");
+        assertOutputContainsRegex("(?s).*\n    \"enter\": \"[0-9]+\"\n.*");
+        assertOutputContainsRegex("(?s).*\n    \"leave\": \"[0-9]+\"\n.*");
     }
 
     @Test
@@ -112,44 +112,44 @@ public class TestDefaultYamlCallTreeListener {
 
         // then
         assertOutputWithoutNanosToEqual(//
-                "  \"Source\": \"testcase\"\n" + //
-                        "  \"CommitID\": \"decaf\"\n" + //
-                        "  \"Children\":\n" + //
-                        "  - \"Node\": \"TEST\"\n" + //
-                        "    \"Message\": \"test\"\n" + //
-                        "    \"ID\": \"4711\"\n" + //
-                        "    \"PreVariables\":\n" + //
-                        "    \"Children\":\n" + //
-                        "    - \"Node\": \"SPECIFICATION_STEP\"\n" + //
-                        "      \"Message\": \"spec step\"\n" + //
-                        "      \"ID\": \"4712\"\n" + //
-                        "      \"PreVariables\":\n" + //
-                        "      \"Children\":\n" + //
-                        "      - \"Node\": \"COMPONENT\"\n" + //
-                        "        \"Message\": \"component\"\n" + //
-                        "        \"ID\": \"4713\"\n" + //
-                        "        \"PreVariables\":\n" + //
-                        "        \"Children\":\n" + //
-                        "        - \"Node\": \"STEP\"\n" + //
-                        "          \"Message\": \"step\"\n" + //
-                        "          \"ID\": \"4714\"\n" + //
-                        "          \"PreVariables\":\n" + //
-                        "          \"Children\":\n" + //
-                        "          \"Status\": \"OK\"\n" + //
-                        "          \"PostVariables\":\n" + //
-                        "        - \"Node\": \"STEP\"\n" + // cbuf
-                        "          \"Message\": \"step\"\n" + //
-                        "          \"ID\": \"4715\"\n" + //
-                        "          \"PreVariables\":\n" + //
-                        "          \"Children\":\n" + //
-                        "          \"Status\": \"OK\"\n" + //
-                        "          \"PostVariables\":\n" + //
-                        "        \"Status\": \"OK\"\n" + //
-                        "        \"PostVariables\":\n" + //
-                        "      \"Status\": \"OK\"\n" + //
-                        "      \"PostVariables\":\n" + //
-                        "    \"Status\": \"OK\"\n" + //
-                        "    \"PostVariables\":\n");
+                "  \"source\": \"testcase\"\n" + //
+                        "  \"commitId\": \"decaf\"\n" + //
+                        "  \"children\":\n" + //
+                        "  - \"node\": \"TEST\"\n" + //
+                        "    \"message\": \"test\"\n" + //
+                        "    \"id\": \"4711\"\n" + //
+                        "    \"preVariables\":\n" + //
+                        "    \"children\":\n" + //
+                        "    - \"node\": \"SPECIFICATION_STEP\"\n" + //
+                        "      \"message\": \"spec step\"\n" + //
+                        "      \"id\": \"4712\"\n" + //
+                        "      \"preVariables\":\n" + //
+                        "      \"children\":\n" + //
+                        "      - \"node\": \"COMPONENT\"\n" + //
+                        "        \"message\": \"component\"\n" + //
+                        "        \"id\": \"4713\"\n" + //
+                        "        \"preVariables\":\n" + //
+                        "        \"children\":\n" + //
+                        "        - \"node\": \"STEP\"\n" + //
+                        "          \"message\": \"step\"\n" + //
+                        "          \"id\": \"4714\"\n" + //
+                        "          \"preVariables\":\n" + //
+                        "          \"children\":\n" + //
+                        "          \"status\": \"OK\"\n" + //
+                        "          \"postVariables\":\n" + //
+                        "        - \"node\": \"STEP\"\n" + // cbuf
+                        "          \"message\": \"step\"\n" + //
+                        "          \"id\": \"4715\"\n" + //
+                        "          \"preVariables\":\n" + //
+                        "          \"children\":\n" + //
+                        "          \"status\": \"OK\"\n" + //
+                        "          \"postVariables\":\n" + //
+                        "        \"status\": \"OK\"\n" + //
+                        "        \"postVariables\":\n" + //
+                        "      \"status\": \"OK\"\n" + //
+                        "      \"postVariables\":\n" + //
+                        "    \"status\": \"OK\"\n" + //
+                        "    \"postVariables\":\n");
     }
 
     @Test
@@ -162,20 +162,20 @@ public class TestDefaultYamlCallTreeListener {
 
         // then
         assertOutputWithoutNanosToEqual(//
-                "  \"Source\": \"testcase\"\n" + //
-                        "  \"CommitID\": \"decaf\"\n" + //
-                        "  \"Children\":\n" + //
-                        "  - \"Node\": \"TEST\"\n" + //
-                        "    \"Message\": \"test\"\n" + //
-                        "    \"ID\": \"4711\"\n" + //
-                        "    \"PreVariables\":\n" + //
-                        "    \"Children\":\n" + //
-                        "    - \"Node\": \"SPECIFICATION_STEP\"\n" + //
-                        "      \"Message\": \"spec step\"\n" + //
-                        "      \"ID\": \"4712\"\n" + //
-                        "      \"PreVariables\":\n" + //
-                        "      \"Children\":\n" + //
-                        "      \"AssertionError\": \"my message\\n\\\"with\"\n");
+                "  \"source\": \"testcase\"\n" + //
+                        "  \"commitId\": \"decaf\"\n" + //
+                        "  \"children\":\n" + //
+                        "  - \"node\": \"TEST\"\n" + //
+                        "    \"message\": \"test\"\n" + //
+                        "    \"id\": \"4711\"\n" + //
+                        "    \"preVariables\":\n" + //
+                        "    \"children\":\n" + //
+                        "    - \"node\": \"SPECIFICATION_STEP\"\n" + //
+                        "      \"message\": \"spec step\"\n" + //
+                        "      \"id\": \"4712\"\n" + //
+                        "      \"preVariables\":\n" + //
+                        "      \"children\":\n" + //
+                        "      \"assertionError\": \"my message\\n\\\"with\"\n");
     }
 
     @Test
@@ -188,20 +188,20 @@ public class TestDefaultYamlCallTreeListener {
 
         // then
         assertOutputWithoutNanosToEqual(//
-                "  \"Source\": \"testcase\"\n" + //
-                        "  \"CommitID\": \"decaf\"\n" + //
-                        "  \"Children\":\n" + //
-                        "  - \"Node\": \"TEST\"\n" + //
-                        "    \"Message\": \"test\"\n" + //
-                        "    \"ID\": \"4711\"\n" + //
-                        "    \"PreVariables\":\n" + //
-                        "    \"Children\":\n" + //
-                        "    - \"Node\": \"SPECIFICATION_STEP\"\n" + //
-                        "      \"Message\": \"spec step\"\n" + //
-                        "      \"ID\": \"4712\"\n" + //
-                        "      \"PreVariables\":\n" + //
-                        "      \"Children\":\n" + //
-                        "      \"Exception\": \"my message\\n\\\"with\"\n");
+                "  \"source\": \"testcase\"\n" + //
+                        "  \"commitId\": \"decaf\"\n" + //
+                        "  \"children\":\n" + //
+                        "  - \"node\": \"TEST\"\n" + //
+                        "    \"message\": \"test\"\n" + //
+                        "    \"id\": \"4711\"\n" + //
+                        "    \"preVariables\":\n" + //
+                        "    \"children\":\n" + //
+                        "    - \"node\": \"SPECIFICATION_STEP\"\n" + //
+                        "      \"message\": \"spec step\"\n" + //
+                        "      \"id\": \"4712\"\n" + //
+                        "      \"preVariables\":\n" + //
+                        "      \"children\":\n" + //
+                        "      \"exception\": \"my message\\n\\\"with\"\n");
     }
 
     @Test
@@ -242,20 +242,20 @@ public class TestDefaultYamlCallTreeListener {
 
         // then
         assertOutputWithoutNanosToEqual(//
-                "  \"Source\": \"testcase\"\n" + //
-                        "  \"CommitID\": \"decaf\"\n" + //
-                        "  \"Children\":\n" + //
-                        "  - \"Node\": \"TEST\"\n" + //
-                        "    \"Message\": \"test\"\n" + //
-                        "    \"ID\": \"4711\"\n" + //
-                        "    \"PreVariables\":\n" + //
-                        "    \"Children\":\n" + //
-                        "    - \"Node\": \"SPECIFICATION_STEP\"\n" + //
-                        "      \"Message\": \"spec step\"\n" + //
-                        "      \"ID\": \"4712\"\n" + //
-                        "      \"PreVariables\":\n" + //
-                        "      \"Children\":\n" + //
-                        "      \"FixtureException\":\n" + //
+                "  \"source\": \"testcase\"\n" + //
+                        "  \"commitId\": \"decaf\"\n" + //
+                        "  \"children\":\n" + //
+                        "  - \"node\": \"TEST\"\n" + //
+                        "    \"message\": \"test\"\n" + //
+                        "    \"id\": \"4711\"\n" + //
+                        "    \"preVariables\":\n" + //
+                        "    \"children\":\n" + //
+                        "    - \"node\": \"SPECIFICATION_STEP\"\n" + //
+                        "      \"message\": \"spec step\"\n" + //
+                        "      \"id\": \"4712\"\n" + //
+                        "      \"preVariables\":\n" + //
+                        "      \"children\":\n" + //
+                        "      \"fixtureException\":\n" + //
                         "        \"an Array\":\n" + //
                         "          -\n" + //
                         "            \"nullKey\":\n" + //
@@ -288,31 +288,31 @@ public class TestDefaultYamlCallTreeListener {
 
         // then
         assertOutputWithoutNanosToEqual(//
-                "  \"Source\": \"testcase\"\n" + //
-                        "  \"CommitID\": \"decaf\"\n" + //
-                        "  \"Children\":\n" + //
-                        "  - \"Node\": \"TEST\"\n" + //
-                        "    \"Message\": \"test\"\n" + //
-                        "    \"ID\": \"4711\"\n" + //
-                        "    \"PreVariables\":\n" + //
-                        "    \"Children\":\n" + //
-                        "    - \"Node\": \"SPECIFICATION_STEP\"\n" + //
-                        "      \"Message\": \"spec step\"\n" + //
-                        "      \"ID\": \"4712\"\n" + //
-                        "      \"PreVariables\":\n" + //
-                        "      \"Children\":\n" + //
-                        "      - \"Node\": \"COMPONENT\"\n" + //
-                        "        \"Message\": \"component\"\n" + //
-                        "        \"ID\": \"4713\"\n" + //
-                        "        \"PreVariables\":\n" + //
-                        "        \"Children\":\n" + //
-                        "        - \"Node\": \"STEP\"\n" + //
-                        "          \"Message\": \"step\"\n" + //
-                        "          \"ID\": \"4714\"\n" + //
-                        "          \"PreVariables\":\n" + //
-                        "          \"Children\":\n" + //
-                        "    \"Status\": \"ABORTED\"\n" + //
-                        "    \"PostVariables\":\n");
+                "  \"source\": \"testcase\"\n" + //
+                        "  \"commitId\": \"decaf\"\n" + //
+                        "  \"children\":\n" + //
+                        "  - \"node\": \"TEST\"\n" + //
+                        "    \"message\": \"test\"\n" + //
+                        "    \"id\": \"4711\"\n" + //
+                        "    \"preVariables\":\n" + //
+                        "    \"children\":\n" + //
+                        "    - \"node\": \"SPECIFICATION_STEP\"\n" + //
+                        "      \"message\": \"spec step\"\n" + //
+                        "      \"id\": \"4712\"\n" + //
+                        "      \"preVariables\":\n" + //
+                        "      \"children\":\n" + //
+                        "      - \"node\": \"COMPONENT\"\n" + //
+                        "        \"message\": \"component\"\n" + //
+                        "        \"id\": \"4713\"\n" + //
+                        "        \"preVariables\":\n" + //
+                        "        \"children\":\n" + //
+                        "        - \"node\": \"STEP\"\n" + //
+                        "          \"message\": \"step\"\n" + //
+                        "          \"id\": \"4714\"\n" + //
+                        "          \"preVariables\":\n" + //
+                        "          \"children\":\n" + //
+                        "    \"status\": \"ABORTED\"\n" + //
+                        "    \"postVariables\":\n");
 
     }
 
@@ -337,7 +337,7 @@ public class TestDefaultYamlCallTreeListener {
     private void assertOutputWithoutNanosToEqual(String expected) {
         try {
             String output = outputStream.toString(StandardCharsets.UTF_8.name());
-            String outputWithoutNanos = output.replaceAll(" *\"(Enter|Leave|Started)\": \"[0-9-.ZT:]*\" *\n", "");
+            String outputWithoutNanos = output.replaceAll(" *\"(enter|leave|started)\": \"[0-9-.ZT:]*\" *\n", "");
             assertEquals(expected, outputWithoutNanos);
         } catch (IOException e) {
             fail(e.getMessage());
