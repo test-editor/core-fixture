@@ -14,6 +14,7 @@
 package org.testeditor.fixture.core;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -59,6 +60,27 @@ public class FixtureException extends Exception {
     public FixtureException(String message, Exception root) {
         super(message, root);
         this.keyValueStore = Collections.emptyMap();
+    }
+
+    /**
+     * generate a map compatible to FixtureException calls by combining the even
+     * numbered portion of the var args into key, value pairs
+     * 
+     * @param objects
+     * @return
+     */
+    public static Map<String, Object> keyValues(Object... objects) {
+        if (objects.length % 2 != 0) {
+            throw new IllegalArgumentException(
+                    "list of objects to keyValues must be even but is '" + Long.toString(objects.length) + "'.");
+        }
+        HashMap<String, Object> result = new HashMap<>();
+
+        for (int i = 0; i < objects.length / 2; i++) {
+            result.put(objects[i * 2].toString(), objects[i * 2 + 1]);
+        }
+
+        return result;
     }
 
 }
