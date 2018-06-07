@@ -42,7 +42,7 @@ public class TestDefaultYamlCallTreeListener {
     @Before
     public void setup() {
         outputStream = new ByteArrayOutputStream();
-        yamlCallTreeListenerUnderTest = new DefaultYamlCallTreeListener(outputStream, "testcase", "decaf");
+        yamlCallTreeListenerUnderTest = new DefaultYamlCallTreeListener(outputStream, "testcase", "1", "decaf");
     }
 
     @Test
@@ -53,7 +53,8 @@ public class TestDefaultYamlCallTreeListener {
 
         // then
         assertOutputWithoutNanosToEqual(//
-                "  \"source\": \"testcase\"\n" + //
+                "- \"source\": \"testcase\"\n" + //
+                        "  \"testRunId\": \"1\"\n" + //
                         "  \"commitId\": \"decaf\"\n" + //
                         "  \"children\":\n" + //
                         "  - \"node\": \"TEST\"\n" + //
@@ -76,7 +77,8 @@ public class TestDefaultYamlCallTreeListener {
 
         // then
         assertOutputWithoutNanosToEqual(//
-                "  \"source\": \"testcase\"\n" + //
+                "- \"source\": \"testcase\"\n" + //
+                        "  \"testRunId\": \"1\"\n" + //
                         "  \"commitId\": \"decaf\"\n" + //
                         "  \"children\":\n" + //
                         "  - \"node\": \"TEST\"\n" + //
@@ -112,7 +114,8 @@ public class TestDefaultYamlCallTreeListener {
 
         // then
         assertOutputWithoutNanosToEqual(//
-                "  \"source\": \"testcase\"\n" + //
+                "- \"source\": \"testcase\"\n" + //
+                        "  \"testRunId\": \"1\"\n" + //
                         "  \"commitId\": \"decaf\"\n" + //
                         "  \"children\":\n" + //
                         "  - \"node\": \"TEST\"\n" + //
@@ -162,7 +165,8 @@ public class TestDefaultYamlCallTreeListener {
 
         // then
         assertOutputWithoutNanosToEqual(//
-                "  \"source\": \"testcase\"\n" + //
+                "- \"source\": \"testcase\"\n" + //
+                        "  \"testRunId\": \"1\"\n" + //
                         "  \"commitId\": \"decaf\"\n" + //
                         "  \"children\":\n" + //
                         "  - \"node\": \"TEST\"\n" + //
@@ -188,7 +192,8 @@ public class TestDefaultYamlCallTreeListener {
 
         // then
         assertOutputWithoutNanosToEqual(//
-                "  \"source\": \"testcase\"\n" + //
+                "- \"source\": \"testcase\"\n" + //
+                        "  \"testRunId\": \"1\"\n" + //
                         "  \"commitId\": \"decaf\"\n" + //
                         "  \"children\":\n" + //
                         "  - \"node\": \"TEST\"\n" + //
@@ -242,7 +247,8 @@ public class TestDefaultYamlCallTreeListener {
 
         // then
         assertOutputWithoutNanosToEqual(//
-                "  \"source\": \"testcase\"\n" + //
+                "- \"source\": \"testcase\"\n" + //
+                        "  \"testRunId\": \"1\"\n" + //
                         "  \"commitId\": \"decaf\"\n" + //
                         "  \"children\":\n" + //
                         "  - \"node\": \"TEST\"\n" + //
@@ -288,7 +294,8 @@ public class TestDefaultYamlCallTreeListener {
 
         // then
         assertOutputWithoutNanosToEqual(//
-                "  \"source\": \"testcase\"\n" + //
+                "- \"source\": \"testcase\"\n" + //
+                        "  \"testRunId\": \"1\"\n" + //
                         "  \"commitId\": \"decaf\"\n" + //
                         "  \"children\":\n" + //
                         "  - \"node\": \"TEST\"\n" + //
