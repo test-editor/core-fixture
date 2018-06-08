@@ -38,9 +38,10 @@ public class DefaultYamlCallTreeListener implements TestRunListener {
 
     protected Map<String, Node> callTreeNodeMap = new HashMap<>();
     protected String testCaseSource;
+    protected String testRunId;
     protected String commitId;
     protected OutputStreamWriter outputStreamWriter;
-    private int currentIndentation = YAML_INDENTATION;
+    private int currentIndentation = 0;
 
     protected static class Node {
         public SemanticUnit unit;
@@ -78,9 +79,11 @@ public class DefaultYamlCallTreeListener implements TestRunListener {
      *            repo
      * @param commitId repo commit id identifying this test version
      */
-    public DefaultYamlCallTreeListener(OutputStream outputStream, String testCaseSource, String commitId) {
+    public DefaultYamlCallTreeListener(OutputStream outputStream, String testCaseSource, String testRunId,
+                                       String commitId) {
         this.outputStreamWriter = new OutputStreamWriter(outputStream, StandardCharsets.UTF_8);
         this.testCaseSource = testCaseSource;
+        this.testRunId = testRunId;
         this.commitId = commitId;
     }
 
@@ -177,7 +180,7 @@ public class DefaultYamlCallTreeListener implements TestRunListener {
             writeVariables("post", variables);
             flush();
         } else {
-            logger.error("Left unknown node with ID '" + StringEscapeUtils.escapeJava(id) + "'");
+            logger.error("Left unknown node with ID '" + StringEscapeUtils.escapeJson(id) + "'");
         }
         decreaseIndentation();
     }
@@ -186,7 +189,9 @@ public class DefaultYamlCallTreeListener implements TestRunListener {
         try {
             switch (action) {
                 case ENTER:
-                    writeString("source", testCaseSource);
+                    writePrefixedString("-", "source", testCaseSource);
+                    increaseIndentation();
+                    writeString("testRunId", testRunId);
                     writeString("commitId", commitId);
                     writeString("started", Instant.now().toString());
                     writeString("children");
@@ -231,7 +236,7 @@ public class DefaultYamlCallTreeListener implements TestRunListener {
                 outputStreamWriter.write(prefix + " ");
             }
             if (!attribute.equals("-")) {
-                String escapedAttribute = StringEscapeUtils.escapeJava(attribute);
+                String escapedAttribute = StringEscapeUtils.escapeJson(attribute);
                 outputStreamWriter.write("\"" + escapedAttribute + "\":");
             } else {
                 outputStreamWriter.write(attribute);
@@ -278,7 +283,7 @@ public class DefaultYamlCallTreeListener implements TestRunListener {
     private void writeStringObject(String string) {
         try {
             if (string != null) {
-                String escapedValue = StringEscapeUtils.escapeJava(string);
+                String escapedValue = StringEscapeUtils.escapeJson(string);
                 outputStreamWriter.write("\"" + escapedValue + "\"");
             }
         } catch (IOException e) {

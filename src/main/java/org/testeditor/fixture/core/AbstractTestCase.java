@@ -13,6 +13,8 @@
 
 package org.testeditor.fixture.core;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -60,6 +62,26 @@ public class AbstractTestCase {
             });
         }
         runningNumber = 0;
+
+        initializeCallTreeListener();
+
+    }
+
+    protected void initializeCallTreeListener() {
+        try {
+            String yamlFileName = System.getenv("TE_CALL_TREE_YAML_FILE");
+            if (yamlFileName != null) {
+                File yamlFile = new File(yamlFileName);
+
+                reporter.addListener(new DefaultYamlCallTreeListener(new FileOutputStream(yamlFile, true),
+                    System.getenv("TE_CALL_TREE_YAML_TEST_CASE"),
+                    System.getenv("TE_CALL_TREE_YAML_TEST_CASE_ID"),
+                    System.getenv("TE_CALL_TREE_YAML_COMMIT_ID")
+                ));
+            }
+        } catch (Exception e) {
+            // fail silently if file cannot be created etc.
+        }
     }
 
     protected String newVarId() {
