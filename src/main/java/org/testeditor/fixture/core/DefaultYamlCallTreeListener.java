@@ -180,7 +180,7 @@ public class DefaultYamlCallTreeListener implements TestRunListener {
             writeVariables("post", variables);
             flush();
         } else {
-            logger.error("Left unknown node with ID '" + StringEscapeUtils.escapeJson(id) + "'");
+            logger.error("Left unknown node with ID '" + StringEscapeUtils.escapeJava(id) + "'");
         }
         decreaseIndentation();
     }
@@ -283,7 +283,7 @@ public class DefaultYamlCallTreeListener implements TestRunListener {
     private void writeStringObject(String string) {
         try {
             if (string != null) {
-                String escapedValue = StringEscapeUtils.escapeJson(string);
+                String escapedValue = StringEscapeUtils.escapeJava(string);
                 outputStreamWriter.write("\"" + escapedValue + "\"");
             }
         } catch (IOException e) {
