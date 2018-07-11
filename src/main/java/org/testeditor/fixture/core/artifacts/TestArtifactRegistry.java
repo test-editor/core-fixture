@@ -103,7 +103,6 @@ public class TestArtifactRegistry {
         }
 
         try {
-
             tmpOutDir = fsAccess.createDirectories(BASE_DIR, suiteId, suiteRunId, testRunId);
         } catch (IOException e) {
             tmpOutDir = null;
@@ -124,10 +123,8 @@ public class TestArtifactRegistry {
         if (outDir != null) {
             if (artifact != null && testStepId != null) {
                 try (Writer writer = fsAccess.getBufferedWriter(outDir.resolve(testStepId + ".yaml"))) {
-
                     writer.append("\"").append(artifact.getType()).append("\": \"")
                           .append(artifact.getPath()).append("\"\n").flush();
-
                 } catch (IOException e) {
                     // this is severe, but may be a temporary, external IO problem. Don't crash the
                     // test execution in this case.

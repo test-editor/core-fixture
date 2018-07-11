@@ -131,8 +131,7 @@ public class TestArtifactRegistryTest {
     @Test
     public void getInstanceShouldReturnInitializedRegistry() {
         // given + when
-        TestArtifactRegistry registry = new TestArtifactRegistry(new FileSystemAccess() {
-        }, defaultEnvironment);
+        TestArtifactRegistry registry = new TestArtifactRegistry(new FileSystemAccess() {}, defaultEnvironment);
 
         // then
         assertThat(registry, notNullValue());
@@ -175,8 +174,7 @@ public class TestArtifactRegistryTest {
     public void missingAllEnvironmentVariablesCauseException() {
         // given + when
         try {
-            new TestArtifactRegistry(new FileSystemAccess() {
-            }, emptyEnvironment);
+            new TestArtifactRegistry(new FileSystemAccess() {}, emptyEnvironment);
 
             fail("Expected exception, but none was thrown");
             // then
@@ -209,8 +207,8 @@ public class TestArtifactRegistryTest {
     public void registryWritesNewFileOnFirstRequest() throws IOException {
         // given
         Path expectedOutputFile = Paths.get(".testexecution/artifacts/0/0/0/testStepWithArtifacts.yaml");
-        TestArtifactRegistry registryUnderTest = new TestArtifactRegistry(new FileSystemAccess() {
-        }, defaultEnvironment);
+        TestArtifactRegistry registryUnderTest = new TestArtifactRegistry(
+                new FileSystemAccess() {}, defaultEnvironment);
         assertTrue(Files.notExists(expectedOutputFile));
 
         // when
@@ -228,8 +226,8 @@ public class TestArtifactRegistryTest {
     public void registryAppendsToExistingFileOnSubsequentRequests() throws IOException {
         // given
         Path expectedOutputFile = Paths.get(".testexecution/artifacts/0/0/0/testStepWithArtifacts.yaml");
-        TestArtifactRegistry registryUnderTest = new TestArtifactRegistry(new FileSystemAccess() {
-        }, defaultEnvironment);
+        TestArtifactRegistry registryUnderTest = new TestArtifactRegistry(
+                new FileSystemAccess() {}, defaultEnvironment);
 
         // when
         registryUnderTest.register(screenshotArtifact, "testStepWithArtifacts");
@@ -253,7 +251,6 @@ public class TestArtifactRegistryTest {
         // when
         try {
             registryUnderTest.register(null, null);
-
             fail("Expected exception but none was thrown");
 
             // then
@@ -271,7 +268,6 @@ public class TestArtifactRegistryTest {
         // when
         try {
             registryUnderTest.register(screenshotArtifact, null);
-
             fail("Expected exception but none was thrown");
 
             // then

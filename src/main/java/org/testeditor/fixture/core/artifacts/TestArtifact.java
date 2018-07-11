@@ -13,10 +13,21 @@
 
 package org.testeditor.fixture.core.artifacts;
 
+/**
+ * Represents any kind of file that was written during test execution.
+ * 
+ * Examples include log files, screenshots or screencasts of the system while it
+ * is being tested, or any other kind of test report.
+ */
 public class TestArtifact {
     private final String type;
     private final String path;
 
+    /**
+     * Creates a new test artifact.
+     * @param type a string identifying the type of artifact, e.g. "screenshot".
+     * @param path the file system path pointing to the artifact.
+     */
     public TestArtifact(String type, String path) {
         this.type = type;
         this.path = path;
