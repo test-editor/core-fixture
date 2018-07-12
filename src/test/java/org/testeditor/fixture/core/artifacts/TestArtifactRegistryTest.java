@@ -82,10 +82,9 @@ public class TestArtifactRegistryTest {
     private EnvironmentAccess defaultEnvironment = new EnvironmentAccess() {
         public String get(String key) {
             switch (key) {
-                case "TE_SUITEID":
-                case "TE_SUITERUNID":
-                case "TE_TESTRUNID":
-                    return "0";
+                case "TE_SUITEID": return "suite0";
+                case "TE_SUITERUNID": return "suiterun23";
+                case "TE_TESTRUNID": return "testrun42";
                 default:
                     return null;
             }
@@ -100,6 +99,8 @@ public class TestArtifactRegistryTest {
 
     private TestArtifact screenshotArtifact = new TestArtifact("screenshot", "screenshots/sampleScreenshot.png");
     private TestArtifact screencastArtifact = new TestArtifact("screencast", "videos/sampleScreencast.mov");
+    private static final String ARTIFACT_FILE_PATH = 
+            ".testexecution/artifacts/suite0/suiterun23/testrun42/testStepWithArtifacts.yaml";
 
     private void mockedLogging() {
         logAppender = mock(Appender.class);
@@ -147,10 +148,13 @@ public class TestArtifactRegistryTest {
 
         // then
         verify(logAppender).append(logCaptor.capture());
+        
         assertThat(logCaptor.getValue().getMessage().getFormattedMessage(),
-                is("Test artifact registry is disabled: Failed to create directory '.testexecution/artifacts/0/0/0'."));
+                is("Test artifact registry is disabled: Failed to create directory "
+                 + "'.testexecution/artifacts/suite0/suiterun23/testrun42'."));
         assertThat(logCaptor.getValue().getLevel(), is(ERROR));
     }
+
 
     @Test
     public void registryWithBrokenFileSystemRejectsRegistrationsButDoesNotThrowAnException() {
@@ -206,7 +210,7 @@ public class TestArtifactRegistryTest {
     @Test
     public void registryWritesNewFileOnFirstRequest() throws IOException {
         // given
-        Path expectedOutputFile = Paths.get(".testexecution/artifacts/0/0/0/testStepWithArtifacts.yaml");
+        Path expectedOutputFile = Paths.get(ARTIFACT_FILE_PATH);
         TestArtifactRegistry registryUnderTest = new TestArtifactRegistry(
                 new FileSystemAccess() {}, defaultEnvironment);
         assertTrue(Files.notExists(expectedOutputFile));
@@ -225,7 +229,7 @@ public class TestArtifactRegistryTest {
     @Test
     public void registryAppendsToExistingFileOnSubsequentRequests() throws IOException {
         // given
-        Path expectedOutputFile = Paths.get(".testexecution/artifacts/0/0/0/testStepWithArtifacts.yaml");
+        Path expectedOutputFile = Paths.get(ARTIFACT_FILE_PATH);
         TestArtifactRegistry registryUnderTest = new TestArtifactRegistry(
                 new FileSystemAccess() {}, defaultEnvironment);
 
