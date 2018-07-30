@@ -30,19 +30,27 @@ public class DefaultTestRunReporter implements TestRunReporter {
 
     protected static final Logger logger = LoggerFactory.getLogger(AbstractTestCase.class);
 
-    // logger (implemented as listener) is always reported on before all other
-    // listeners!
-    private final TestRunListener logListener = new DefaultLoggingListener();
+    // on enter, logger (implemented as listener) is always reported on before all other
+    // listeners; on leave, it is reported on after all others.
+    private final TestRunListener logListener;
 
     // per semantic unit only one may be active
-    private List<TestRunListener> listeners = new ArrayList<TestRunListener>();
+    private final List<TestRunListener> listeners = new ArrayList<TestRunListener>();
 
+    public DefaultTestRunReporter() {
+        this(new DefaultLoggingListener());
+    }
+    
+    public DefaultTestRunReporter(TestRunListener logListener) {
+        this.logListener = logListener;
+    }
+    
     @Override
     public void enter(SemanticUnit unit, String msg, String id, Status status, Map<String, String> variables) {
         if (unit == SemanticUnit.TEST) {
             MDC.put("TestName", "TE-Test: " + msg.replaceAll("^.*\\.", ""));
         }
-        informListeners(unit, Action.ENTER, msg, id, status, variables);
+        informAllListeners(unit, Action.ENTER, msg, id, status, variables);
     }
 
     /**
@@ -52,7 +60,7 @@ public class DefaultTestRunReporter implements TestRunReporter {
      */
     @Override
     public void leave(SemanticUnit unit, String msg, String id, Status status, Map<String, String> variables) {
-        informListeners(unit, Action.LEAVE, msg, id, status, variables);
+        informAllListeners(unit, Action.LEAVE, msg, id, status, variables);
 
         if (unit == SemanticUnit.TEST) {
             MDC.remove("TestName");
@@ -62,14 +70,29 @@ public class DefaultTestRunReporter implements TestRunReporter {
     /**
      * make sure that all registered listeners are informed, order is not guaranteed
      */
-    private void informListeners(SemanticUnit unit, Action action, String msg, String id, Status status,
+    private void informAllListeners(SemanticUnit unit, Action action, String msg, String id, Status status,
+            Map<String, String> variables) {
+        if (action == action.ENTER) {
+            informLogListener(unit, action, msg, id, status, variables);
+            informRegisteredListeners(unit, action, msg, id, status, variables);
+        } else {
+            informRegisteredListeners(unit, action, msg, id, status, variables);
+            informLogListener(unit, action, msg, id, status, variables);            
+        }
+    }
+    
+    private void informLogListener(SemanticUnit unit, Action action, String msg, String id, Status status,
             Map<String, String> variables) {
         try {
-            logListener.reported(unit, action, msg, id, status, variables); // logListener is always reported to first!
+            logListener.reported(unit, action, msg, id, status, variables); 
         } catch (Exception e) {
             logger.warn("Log Listener " + logListener.getClass().getName() + " threw an exception processing unit='"
                     + unit + "', action='" + action + "', msg='" + msg + "'.", e);
         }
+    }
+    
+    private void informRegisteredListeners(SemanticUnit unit, Action action, String msg, String id, Status status,
+            Map<String, String> variables) {
         for (TestRunListener listener : listeners) {
             try {
                 // make sure that an exception is handled gracefully, so that
