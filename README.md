@@ -21,3 +21,21 @@ In order to create a release switch to the `master` branch and execute
     ./gradlew release
 
 and enter the new version. After the commit and tag is pushed Travis will automatically build and deploy the tagged version to Bintray.
+
+### Test execution
+
+#### Environment variables
+
+The following environment variables are expected to be passed via test execution such that the AbtractTestCase can successfully write the executed call tree and/or register files associated with the test run (e.g. screenshots):
+
+```
+TE_CALL_TREE_YAML_FILE: String with the filename for the call tree yaml file that is to be written during test execution
+TE_SUITEID: String with the unique test suite id (globally unique)
+TE_SUITERUNID : String with the unique test suite run id (unique within the test suite)
+TE_TESTRUNID: String with the unique id within the test suite run
+TE_TESTRUNCOMMITID : String with the commit id that is associated with the given test run
+TE_TESTCASENAME : String with the name of the test to execute (just informational)
+```
+
+Test artifact registration works only if TE_SUITEID, TE_SUITERUNID and TE_TESTRUNID are passed.
+Call tree yaml file generation works only if TE_CALL_TREE_YAML_FILE, TE_TESTRUNID are passed, TE_TESTRUNCOMMITID and TE_TESTCASENAME are recommended but optional.
