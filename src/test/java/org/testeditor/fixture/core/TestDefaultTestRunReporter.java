@@ -39,6 +39,8 @@ public class TestDefaultTestRunReporter {
     private TestRunReporter classUnderTest = null;
 
     @Mock
+    TestRunListener logListener;
+    @Mock
     TestRunListener listener;
     @Mock
     TestRunListener secondListener;
@@ -50,7 +52,7 @@ public class TestDefaultTestRunReporter {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        classUnderTest = new DefaultTestRunReporter();
+        classUnderTest = new DefaultTestRunReporter(logListener);
         doThrow(new RuntimeException("exception")).when(brokenListener1).reported(any(SemanticUnit.class),
                 any(Action.class), any(String.class), any(String.class), any(Status.class), any());
         doThrow(new RuntimeException("exception")).when(brokenListener2).reported(any(SemanticUnit.class),
@@ -153,6 +155,38 @@ public class TestDefaultTestRunReporter {
         verify(brokenListener2).reported(TEST, ENTER, "Test", "ID", Status.STARTED, null);
         verify(listener).reported(TEST, ENTER, "Test", "ID", Status.STARTED, null);
         verifyNoMoreInteractions(listener, brokenListener1, brokenListener2);
+    }
+    
+    @Test
+    public void testLogListenerIsReportedToFirstOnEnter() {
+        // given
+        classUnderTest.addListener(listener);
+        classUnderTest.addListener(secondListener);
+        
+        // when
+        classUnderTest.enter(TEST, "Test", "ID1", Status.STARTED, null);
+        
+        // then
+        InOrder listenerOrder = inOrder(listener, secondListener, logListener);
+        listenerOrder.verify(logListener).reported(TEST, ENTER, "Test", "ID1", Status.STARTED, null);
+        listenerOrder.verify(listener).reported(TEST, ENTER, "Test", "ID1", Status.STARTED, null);
+        listenerOrder.verify(secondListener).reported(TEST, ENTER, "Test", "ID1", Status.STARTED, null);
+    }
+    
+    @Test
+    public void testLogListenerIsReportedToLastOnLeave() {
+        // given
+        classUnderTest.addListener(listener);
+        classUnderTest.addListener(secondListener);
+        
+        // when
+        classUnderTest.leave(TEST, "Test", "ID1", Status.STARTED, null);
+        
+        // then
+        InOrder listenerOrder = inOrder(listener, secondListener, logListener);
+        listenerOrder.verify(listener).reported(TEST, LEAVE, "Test", "ID1", Status.STARTED, null);
+        listenerOrder.verify(secondListener).reported(TEST, LEAVE, "Test", "ID1", Status.STARTED, null);
+        listenerOrder.verify(logListener).reported(TEST, LEAVE, "Test", "ID1", Status.STARTED, null);
     }
 
 }
