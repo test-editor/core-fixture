@@ -73,11 +73,12 @@ public class AbstractTestCase {
             if (yamlFileName != null) {
                 File yamlFile = new File(yamlFileName);
 
-                reporter.addListener(new DefaultYamlCallTreeListener(new FileOutputStream(yamlFile, true),
-                    System.getenv("TE_CALL_TREE_YAML_TEST_CASE"),
-                    System.getenv("TE_CALL_TREE_YAML_TEST_CASE_ID"),
-                    System.getenv("TE_CALL_TREE_YAML_COMMIT_ID")
-                ));
+                String testCaseName = System.getenv("TE_TESTCASENAME");
+                String testRunId = System.getenv("TE_TESTRUNID");
+                String testCommitId = System.getenv("TE_TESTRUNCOMMITID");
+
+                reporter.addListener(new DefaultYamlCallTreeListener(new FileOutputStream(yamlFile, true), 
+                        testCaseName, testRunId, testCommitId));
             }
         } catch (Exception e) {
             // fail silently if file cannot be created etc.
