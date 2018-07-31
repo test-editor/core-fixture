@@ -22,6 +22,8 @@ import java.util.Map;
 
 import org.junit.After;
 import org.junit.Before;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testeditor.fixture.core.TestRunReporter.SemanticUnit;
 import org.testeditor.fixture.core.TestRunReporter.Status;
 
@@ -47,6 +49,8 @@ public class AbstractTestCase {
     private long runningNumber;
     // (probably an) assertion error if test is not finished as expected
     private Status finalStatus = Status.ERROR;
+    
+    protected final static Logger logger = LoggerFactory.getLogger(AbstractTestCase.class);
 
     /**
      * default constructor
@@ -69,19 +73,20 @@ public class AbstractTestCase {
 
     protected void initializeCallTreeListener() {
         try {
-            String yamlFileName = System.getenv("TE_CALL_TREE_YAML_FILE");
+            String yamlFileName = getEnvVar("TE_CALL_TREE_YAML_FILE");
             if (yamlFileName != null) {
                 File yamlFile = new File(yamlFileName);
 
-                String testCaseName = System.getenv("TE_TESTCASENAME");
-                String testRunId = System.getenv("TE_TESTRUNID");
-                String testCommitId = System.getenv("TE_TESTRUNCOMMITID");
-
+                String testCaseName = getEnvVar("TE_TESTCASENAME");
+                String testRunId = getEnvVar("TE_TESTRUNID");
+                String testCommitId = getEnvVar("TE_TESTRUNCOMMITID");
+                
                 reporter.addListener(new DefaultYamlCallTreeListener(new FileOutputStream(yamlFile, true), 
                         testCaseName, testRunId, testCommitId));
+                logger.info("Added yaml call tree listener to test excecution writing to file = \"" + yamlFileName + "\".");
             }
         } catch (Exception e) {
-            // fail silently if file cannot be created etc.
+            logger.warn("Failed to add yaml cal tree listener.", e);
         }
     }
 
@@ -136,6 +141,18 @@ public class AbstractTestCase {
         }
 
         return result;
+    }
+    
+    private String getEnvVar(String key) {
+       String result = System.getenv(key);
+       logWarningIfNull(result, "expected environment variable = \"" + key + "\" is empty");
+       return result;
+    }
+    
+    private void logWarningIfNull(Object value, String warning) {
+        if (value == null) {
+            logger.warn(warning);
+        }
     }
 
 }
