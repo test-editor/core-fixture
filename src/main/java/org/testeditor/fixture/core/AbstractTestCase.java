@@ -50,7 +50,7 @@ public class AbstractTestCase {
     // (probably an) assertion error if test is not finished as expected
     private Status finalStatus = Status.ERROR;
     
-    protected final static Logger logger = LoggerFactory.getLogger(AbstractTestCase.class);
+    protected static final Logger logger = LoggerFactory.getLogger(AbstractTestCase.class);
 
     /**
      * default constructor
@@ -83,7 +83,8 @@ public class AbstractTestCase {
                 
                 reporter.addListener(new DefaultYamlCallTreeListener(new FileOutputStream(yamlFile, true), 
                         testCaseName, testRunId, testCommitId));
-                logger.info("Added yaml call tree listener to test excecution writing to file = \"" + yamlFileName + "\".");
+                logger.info("Added yaml call tree listener to test excecution writing to file = \"" 
+                        + yamlFileName + "\".");
             }
         } catch (Exception e) {
             logger.warn("Failed to add yaml cal tree listener.", e);
@@ -144,9 +145,9 @@ public class AbstractTestCase {
     }
     
     private String getEnvVar(String key) {
-       String result = System.getenv(key);
-       logWarningIfNull(result, "expected environment variable = \"" + key + "\" is empty");
-       return result;
+        String result = System.getenv(key);
+        logWarningIfNull(result, "expected environment variable = \"" + key + "\" is empty");
+        return result;
     }
     
     private void logWarningIfNull(Object value, String warning) {
