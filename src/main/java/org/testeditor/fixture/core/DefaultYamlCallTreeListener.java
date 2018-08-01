@@ -73,7 +73,7 @@ public class DefaultYamlCallTreeListener implements TestRunListener {
 
     /**
      * Ctor
-     * 
+     *
      * @param outputStream where yaml is written to
      * @param testCaseSource file/resource path identifying this test within the
      *            repo
@@ -236,7 +236,7 @@ public class DefaultYamlCallTreeListener implements TestRunListener {
                 outputStreamWriter.write(prefix + " ");
             }
             if (!attribute.equals("-")) {
-                String escapedAttribute = StringEscapeUtils.escapeJson(attribute);
+                String escapedAttribute = StringEscapeUtils.escapeJava(attribute);
                 outputStreamWriter.write("\"" + escapedAttribute + "\":");
             } else {
                 outputStreamWriter.write(attribute);
