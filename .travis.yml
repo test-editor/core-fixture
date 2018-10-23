@@ -1,11 +1,17 @@
-language: java
+language: nix
 sudo: false
-jdk:
-  - oraclejdk8
 cache:
   directories:
-  - $HOME/.gradle/caches/
-  - $HOME/.gradle/wrapper/
+  - "$HOME/nix.store"
+  - "$HOME/.gradle/caches/"
+  - "$HOME/.gradle/wrapper/"
+before_install:
+- sudo mkdir -p /etc/nix
+- echo "substituters = https://cache.nixos.org/ file://$HOME/nix.store" | sudo tee -a /etc/nix/nix.conf > /dev/null
+- echo 'require-sigs = false' | sudo tee -a /etc/nix/nix.conf > /dev/null
+before_cache:
+- mkdir -p $HOME/nix.store
+- nix copy --to file://$HOME/nix.store -f default.nix buildInputs
 
 env:
   global:
@@ -17,7 +23,8 @@ env:
   - secure: kV3Iv0XHels1ULD3l7NzUkUlobADx7z5IZ2tR67jZPUgLiNkJEKKLp88n5ESSiISRHisznNTL3hPSiEDhE41cOTAe6TGHO90BijQuHd5TRDToOf7PvHUbddLPhHiEnc4jxLxO+X4Lo+dDiDOIdgFwIyc5NOKLb/uIufqM8pXV3GrvNb4jkf6lxCjUsMbV/0CkOZEuPuHwAg/Ob4nTOlD4c4fCaQb9zo4gQ3i9JG/rqg2PW6/7+YMV4brGv8FMxpDUVgGvQy1Rz6zy0lvI38DmOGMBrqqivKxePWePxyc/jH7b/tzIRlNXV1yV9pXsLT1GtYx5H+itcN8UmipBEjpKKEEa2Bw3jAIZUxHBMmJKTFYP5yiNj54rR/VzDrrmmgdPmlQbEhPf/bNz8K5q3j72UPKH7ozn2sT0/BFnyQuVY/8A8e+UYW721L/QVqqnSYnfNuMOvAJWEHHVDS0BWu95KrRiIJyR2ii64ADz0qPNc/s1eBJHxy0KMfrejiMMG8sCOZ3Q4dyLyJ+3hiKEa5tWgS66Ye/yWClcJCOGlWqdxwArQ/LzBgFETEafGGKJODBAM7zUv5Z7HgoL4nBgJgmKrHbhRdQ2WpjD/QtH+umOaFezGZ7UBFlPMQK4/53SxYB/UMe0G0uVXLoWGZE+lCzgytiF/cRTmcJaflfgUG5tQI=
   matrix:
     - FIREFOX_VERSION="latest"
-
+script:
+  - nix-shell --command "./gradlew assemble check install"
 after_success:
   - bash <(curl -s https://codecov.io/bash)
-  - ./.travis-publishOnRelease.sh
+  - nix-shell --command "./.travis-publishOnRelease.sh"
