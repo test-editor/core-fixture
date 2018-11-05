@@ -28,6 +28,11 @@ import org.slf4j.MDC;
  */
 public class DefaultTestRunReporter implements TestRunReporter {
 
+    private static final String REPORTING_PROBLEM = "Test could not report correctly.";
+    private static final String CLEANUP_REPORTING_FAILED =
+        "Test could not cleanup reporting of exceptions and may not shutdown correctly.";
+    private static final String CONTACT_ADMIN = " In case of errors please contact the administrator.";
+
     protected static final Logger logger = LoggerFactory.getLogger(AbstractTestCase.class);
 
     // on enter, logger (implemented as listener) is always reported on before all other
@@ -77,16 +82,17 @@ public class DefaultTestRunReporter implements TestRunReporter {
             informRegisteredListeners(unit, action, msg, id, status, variables);
         } else {
             informRegisteredListeners(unit, action, msg, id, status, variables);
-            informLogListener(unit, action, msg, id, status, variables);            
+            informLogListener(unit, action, msg, id, status, variables);
         }
     }
     
     private void informLogListener(SemanticUnit unit, Action action, String msg, String id, Status status,
             Map<String, String> variables) {
         try {
-            logListener.reported(unit, action, msg, id, status, variables); 
+            logListener.reported(unit, action, msg, id, status, variables);
         } catch (Exception e) {
-            logger.warn("Log Listener " + logListener.getClass().getName() + " threw an exception processing unit='"
+            logger.warn(REPORTING_PROBLEM + CONTACT_ADMIN);
+            logger.debug("Log Listener " + logListener.getClass().getName() + " threw an exception processing unit='"
                     + unit + "', action='" + action + "', msg='" + msg + "'.", e);
         }
     }
@@ -99,8 +105,10 @@ public class DefaultTestRunReporter implements TestRunReporter {
                 // other listeners are informed, too
                 listener.reported(unit, action, msg, id, status, variables);
             } catch (Exception e) {
-                logger.warn("Listener " + listener.getClass().getName() + " threw an exception processing unit='" + unit
-                        + "', action='" + action + "', msg='" + msg + "'.", e);
+                logger.warn(REPORTING_PROBLEM + CONTACT_ADMIN);
+                logger.debug("Listener " + listener.getClass().getName()
+                             + " threw an exception processing unit='" + unit
+                             + "', action='" + action + "', msg='" + msg + "'.", e);
             }
         }
     }
@@ -110,7 +118,8 @@ public class DefaultTestRunReporter implements TestRunReporter {
         if (listener != null) {
             listeners.add(listener);
         } else {
-            logger.warn("Cannot add listener that is NULL!");
+            logger.warn("Test could not setup reporting correctly." + CONTACT_ADMIN);
+            logger.debug("Cannot add listener that is NULL!");
         }
     }
 
@@ -124,7 +133,8 @@ public class DefaultTestRunReporter implements TestRunReporter {
         try {
             logListener.reportFixtureExit(fixtureException); // logListener is always reported to first!
         } catch (Exception e) {
-            logger.warn(
+            logger.warn(CLEANUP_REPORTING_FAILED + CONTACT_ADMIN);
+            logger.debug(
                     "Log listener '" + logListener.getClass().getName() + "' threw an exception reporting fixture exit",
                     e);
         }
@@ -134,7 +144,8 @@ public class DefaultTestRunReporter implements TestRunReporter {
                 // other listeners are informed, too
                 listener.reportFixtureExit(fixtureException);
             } catch (Exception e) {
-                logger.warn(
+                logger.warn(CLEANUP_REPORTING_FAILED + CONTACT_ADMIN);
+                logger.debug(
                         "Listener '" + listener.getClass().getName() + "' threw an exception reporting fixture exit",
                         e);
             }
@@ -155,7 +166,8 @@ public class DefaultTestRunReporter implements TestRunReporter {
                 // other listeners are informed, too
                 listener.reportExceptionExit(exception);
             } catch (Exception e) {
-                logger.warn(
+                logger.warn(CLEANUP_REPORTING_FAILED + CONTACT_ADMIN);
+                logger.debug(
                         "Listener '" + listener.getClass().getName() + "' threw an exception reporting exception exit",
                         e);
             }

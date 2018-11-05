@@ -2,16 +2,12 @@ language: nix
 sudo: false
 cache:
   directories:
-  - "$HOME/nix.store"
   - "$HOME/.gradle/caches/"
   - "$HOME/.gradle/wrapper/"
 before_install:
 - sudo mkdir -p /etc/nix
 - echo "substituters = https://cache.nixos.org/ file://$HOME/nix.store" | sudo tee -a /etc/nix/nix.conf > /dev/null
 - echo 'require-sigs = false' | sudo tee -a /etc/nix/nix.conf > /dev/null
-before_cache:
-- mkdir -p $HOME/nix.store
-- nix copy --to file://$HOME/nix.store -f default.nix buildInputs
 
 env:
   global:
@@ -21,8 +17,6 @@ env:
   - # Environment variables for GITHUB
   - secure: tNFULlJt/9kS8l6lsJ4oOi5eLMXZ/L3j7FAOyPKP1fT/dw2RqtVpkAxqWyBPrWO42GNrjM7JHGr9GdfaWmnt/+x5g8qHXlKuGpeHU3VT+RqU8vmhu0f6PNiSjLliCHSNTfSkpuhvGDIYF0R9i4jPg7XmlDdFoktBrBXTR7n/Y6R4IaHKoeGRQsB5x1yc1zo3iMj9eJkPiXzWezoWo4uPpU0+bj0H72igdVCXkmlwAy2A2pBPlGZ6LAmhIJIcLey0WuVduujcXba6ulmjd4Bu2sdTT6XjRoIZESd0TzczW7VJ3Ybz2yAJdsslDDj1JdQ3O6Pqj/BO8ntOzPPVBobSx7XEibmpqrb/y3tpxa5nhEsHS4JMXTRpjkWda9BzfhvDekzqLiGuAcZUca3G78WTyztyX1ZtzvkxnCBWK9HSzrOOsPTStVArjpX6hRKR1oAt8L0hpVE1Xax/SWZUL2CnGBkhAbQorLRvIwxJnAIdOU75MUPZw5JoSRAzInEJ60jqgoRo6uJIq3U5x6D2X+/m3DoE7RxFPdPcQsapVLwxP3n6dAgk00HMS841XRKdWywNBT5+bgW5ClTpBeG1cjWN8GDYu2ugyFnFwphZ3DJmHrD8JaPmDpxUkVLBP1JS1kMoL3cByNYZGWzEk83GRrbB2Pd2wfGPzdBfcAxJ011jhW4=
   - secure: kV3Iv0XHels1ULD3l7NzUkUlobADx7z5IZ2tR67jZPUgLiNkJEKKLp88n5ESSiISRHisznNTL3hPSiEDhE41cOTAe6TGHO90BijQuHd5TRDToOf7PvHUbddLPhHiEnc4jxLxO+X4Lo+dDiDOIdgFwIyc5NOKLb/uIufqM8pXV3GrvNb4jkf6lxCjUsMbV/0CkOZEuPuHwAg/Ob4nTOlD4c4fCaQb9zo4gQ3i9JG/rqg2PW6/7+YMV4brGv8FMxpDUVgGvQy1Rz6zy0lvI38DmOGMBrqqivKxePWePxyc/jH7b/tzIRlNXV1yV9pXsLT1GtYx5H+itcN8UmipBEjpKKEEa2Bw3jAIZUxHBMmJKTFYP5yiNj54rR/VzDrrmmgdPmlQbEhPf/bNz8K5q3j72UPKH7ozn2sT0/BFnyQuVY/8A8e+UYW721L/QVqqnSYnfNuMOvAJWEHHVDS0BWu95KrRiIJyR2ii64ADz0qPNc/s1eBJHxy0KMfrejiMMG8sCOZ3Q4dyLyJ+3hiKEa5tWgS66Ye/yWClcJCOGlWqdxwArQ/LzBgFETEafGGKJODBAM7zUv5Z7HgoL4nBgJgmKrHbhRdQ2WpjD/QtH+umOaFezGZ7UBFlPMQK4/53SxYB/UMe0G0uVXLoWGZE+lCzgytiF/cRTmcJaflfgUG5tQI=
-  matrix:
-    - FIREFOX_VERSION="latest"
 script:
   - nix-shell --command "./gradlew assemble check install"
 after_success:

@@ -14,6 +14,7 @@ dependencies {
 	compile 'org.apache.logging.log4j:log4j-slf4j-impl:2.11.0'
 	compile 'junit:junit:4.12'
 	compile 'org.apache.commons:commons-lang3:3.7'
+	compile 'org.apache.commons:commons-text:1.6'
 	testCompile 'org.mockito:mockito-all:1.10.19'
 }
 
@@ -31,6 +32,32 @@ targetCompatibility = 1.10
 
 // show standard out during test to see logging output
 test.testLogging.showStandardStreams = true
+
+// For a summary of failed tests at the end of test execution.
+tasks.withType(Test) {
+    // a collection to track failedTests
+    ext.failedTests = []
+     afterTest { descriptor, result ->
+        if (result.resultType == TestResult.ResultType.FAILURE) {
+            String failedTest = "${descriptor.className}::${descriptor.name}"
+            logger.debug("Adding " + failedTest + " to failedTests...")
+            failedTests << [failedTest]
+        }
+    }
+     afterSuite { suite, result ->
+        if (!suite.parent) { // will match the outermost suite
+            // logs each failed test
+            if (!failedTests.empty) {
+                logger.lifecycle("\n\n*************************************************************************************************")
+                logger.lifecycle("\nFailed tests:")
+                failedTests.each { failedTest ->
+                    logger.lifecycle("${failedTest}")
+                }
+            }
+            logger.lifecycle("\n*************************************************************************************************\n")
+        }
+    }
+}
 
 jar {
     manifest {
