@@ -9,6 +9,16 @@ A core fixture will be used by a concrete test driver like e.g. web-fixture.
 
 ## Development
 
+### Setup development
+
+Make sure to have a working [nix](https://nixos.org/nix/) installation. Please ensure that the `nixpkgs-unstable` channel is available. It
+can be added with `nix-channel --add https://nixos.org/channels/nixpkgs-unstable`.
+
+To enter the development environment, execute `NIXPKGS_ALLOW_UNFREE=1 nix-shell` in this repos root directory. For even more convenience,
+please install [direnv](https://github.com/direnv/direnv) which will enter the development environment automatically for you.
+
+Once within the development environment, run `./gradlew build` to resolve all necessary dependencies and run all checks.
+
 ### Build
 
     git submodule update --init --recursive
