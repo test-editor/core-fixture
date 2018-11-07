@@ -18,7 +18,9 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,6 +36,15 @@ public class DefaultYamlCallTreeListener implements TestRunListener {
 
     protected static final Logger logger = LoggerFactory.getLogger(DefaultYamlCallTreeListener.class);
 
+    // @formatter:off
+    /* indentation
+     * 0 = test suite run
+     * 2 = test run
+     * 4 = setup/cleanup/specification step
+     * ... the other indentation is related to the actual implementation of the setup/cleanup/spec steps
+     *     and is no longer associated with a fixed indentation level
+     */
+    // @formatter:on
     public static final int YAML_INDENTATION = 2;
 
     protected Map<String, Node> callTreeNodeMap = new HashMap<>();
@@ -42,6 +53,8 @@ public class DefaultYamlCallTreeListener implements TestRunListener {
     protected String commitId;
     protected OutputStreamWriter outputStreamWriter;
     private int currentIndentation = 0;
+    
+    private Deque<Node> enteredNodes = new ArrayDeque<>();
 
     protected static class Node {
         public SemanticUnit unit;
@@ -74,28 +87,50 @@ public class DefaultYamlCallTreeListener implements TestRunListener {
     /**
      * Ctor
      *
-     * @param outputStream where yaml is written to
+     * @param outputStream   where yaml is written to
      * @param testCaseSource file/resource path identifying this test within the
-     *            repo
-     * @param commitId repo commit id identifying this test version
+     *                       repo
+     * @param commitId       repo commit id identifying this test version
      */
     public DefaultYamlCallTreeListener(OutputStream outputStream, String testCaseSource, String testRunId,
-                                       String commitId) {
+            String commitId) {
         this.outputStreamWriter = new OutputStreamWriter(outputStream, StandardCharsets.UTF_8);
         this.testCaseSource = testCaseSource;
         this.testRunId = testRunId;
         this.commitId = commitId;
     }
 
+    // @formatter:off
     /*
-     * Node: "SPEC_STEP" Message: "message" ID: "id" Enter: "timestamp of enter"
-     * Children: - Node: "COMPONENT" Message: "message" ID: "id" Enter: "..."
-     * Children: - Node: "STEP" Message: "message" ID: "ID" Enter: "..." Children:
-     * Leave: "..." Status: "..." - Node: "STEP" Message: "Message" ID: "ID" Enter:
-     * "..." Children: Leave: "..." Status: "..." Leave: "..." Status: "" Leave:
-     * "timestamp of leave" Status: "OK|UNKNOWN|ERROR"
+     * Node: "SPEC_STEP"
+     * Message: "message"
+     * ID: "id"
+     * Enter: "timestamp of enter"
+     * Children:
+     * - Node: "COMPONENT"
+     *   Message: "message"
+     *   ID: "id" Enter: "..."
+     *   Children:
+     *   - Node: "STEP"
+     *     Message: "message"
+     *     ID: "ID"
+     *     Enter: "..."
+     *     Children:
+     *     Leave: "..."
+     *     Status: "..."
+     *   - Node: "STEP"
+     *     Message: "Message"
+     *     ID: "ID"
+     *     Enter: "..."
+     *     Children:
+     *     Leave: "..."
+     *     Status: "..."
+     *   Leave: "..."
+     *   Status: ""
+     * Leave: "timestamp of leave"
+     * Status: "OK|UNKNOWN|ERROR"
      */
-
+    // @formatter:ON
     @Override
     public void reported(SemanticUnit unit, Action action, String message, String id, Status status,
             Map<String, String> variables) {
@@ -106,25 +141,32 @@ public class DefaultYamlCallTreeListener implements TestRunListener {
             default:
                 writeNode(unit, action, message, id, status, variables);
                 break;
-
         }
     }
 
     @Override
     public void reportFixtureExit(FixtureException fixtureException) {
-        dispatchingWrite("fixtureException", fixtureException.getKeyValueStore());
+        Map<String, Object> keyValueStore = new HashMap<>(fixtureException.getKeyValueStore());
+        keyValueStore.put("fixtureExceptionMessage", fixtureException.getLocalizedMessage());
+        dispatchingWrite("fixtureException", keyValueStore);
+        writeOpenNodeLeaves(Status.ERROR);
+        currentIndentation = 2 * YAML_INDENTATION; // subsequent logging is done at test-run level
         flush();
     }
 
     @Override
     public void reportExceptionExit(Exception exception) {
         dispatchingWrite("exception", exception.getLocalizedMessage());
+        writeOpenNodeLeaves(Status.ERROR);
+        currentIndentation = 2 * YAML_INDENTATION;
         flush();
     }
 
     @Override
     public void reportAssertionExit(AssertionError assertionError) {
         dispatchingWrite("assertionError", assertionError.getLocalizedMessage());
+        writeOpenNodeLeaves(Status.ERROR);
+        currentIndentation = 2 * YAML_INDENTATION;
         flush();
     }
 
@@ -155,6 +197,9 @@ public class DefaultYamlCallTreeListener implements TestRunListener {
         writeVariables("pre", variables);
         writeString("children");
         flush();
+        if (nodeKeptOnStack(node)) {
+            enteredNodes.push(node);
+        }
     }
 
     private void increaseIndentation() {
@@ -168,21 +213,43 @@ public class DefaultYamlCallTreeListener implements TestRunListener {
     private void writeVariables(String prefix, Map<String, String> variables) {
         dispatchingWrite(prefix + "Variables", variables);
     }
-
+    
+    private void leaveNodePredatingThisFromStack(String id) {
+        while (!enteredNodes.isEmpty() && !id.equals(enteredNodes.peek().id)) {
+            Node intermediateLeave = enteredNodes.peek();
+            writeLeavingNode(intermediateLeave, Status.UNKNOWN, null);
+            enteredNodes.pop();
+        }
+    }
+    
+    /** Test itself is not kept on the stack, since unrolling the stack does 
+     *  not leave the test context */
+    private boolean nodeKeptOnStack(Node node) {
+        return !SemanticUnit.TEST.equals(node.unit);
+    }
+    
     private void leaveNode(String id, Status status, Map<String, String> variables) {
         Node node = callTreeNodeMap.get(id);
         if (node != null) {
-            node.leaveNode(status);
-            currentIndentation = node.parentIndentation;
-            increaseIndentation();
-            writeString("leave", Long.toString(node.nanoTimeLeft));
-            writeString("status", status.toString());
-            writeVariables("post", variables);
-            flush();
+            leaveNodePredatingThisFromStack(id);
+            writeLeavingNode(node, status, variables);
+            if (nodeKeptOnStack(node)) {
+                enteredNodes.pop();
+            }
         } else {
             logger.error("Left unknown node with ID '" + StringEscapeUtils.escapeJava(id) + "'");
         }
         decreaseIndentation();
+    }
+    
+    private void writeLeavingNode(Node node, Status status, Map<String, String> variables) {
+        node.leaveNode(status);
+        currentIndentation = node.parentIndentation;
+        increaseIndentation();
+        writeString("leave", Long.toString(node.nanoTimeLeft));
+        writeString("status", status.toString());
+        writeVariables("post", variables);
+        flush();
     }
 
     private void writeTestNode(Action action, String message, String id, Status status, Map<String, String> variables) {
@@ -325,6 +392,13 @@ public class DefaultYamlCallTreeListener implements TestRunListener {
         } catch (IOException e) {
             logger.error("flushing yaml call tree entry failed", e);
         }
+    }
+
+    private void writeOpenNodeLeaves(Status status) {
+        enteredNodes.forEach((node) -> {
+            writeLeavingNode(node, status, null);
+        });
+        enteredNodes.clear();
     }
 
 }

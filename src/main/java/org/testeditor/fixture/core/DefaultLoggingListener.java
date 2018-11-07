@@ -13,7 +13,9 @@
 
 package org.testeditor.fixture.core;
 
+import java.util.ArrayDeque;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -40,6 +42,8 @@ public class DefaultLoggingListener implements TestRunListener {
     protected static final Logger logger = LoggerFactory.getLogger(DefaultLoggingListener.class);
     private long start;
     private int currentIndent = 0;
+    
+    protected final Deque<String> openLeaveStack = new ArrayDeque<>();
 
     /** copy of StringEscapeUtils.ESCAPE_JAVA, except for the unicode translation */
     public static final CharSequenceTranslator ESCAPE_JAVA;
@@ -60,6 +64,10 @@ public class DefaultLoggingListener implements TestRunListener {
             Map<String, String> variables) {
         if (Action.ENTER.equals(action)) {
             logTechnicalReference(unit, action, message, id);
+            // don't push test leave marker, since stack unrolling is done within a test, not exiting it!
+            if (!SemanticUnit.TEST.equals(unit)) {
+                openLeaveStack.push(buildTechnicalReferenceString(unit, Action.LEAVE, message, id));
+            }
         }
         switch (unit) {
             case TEST:
@@ -79,6 +87,12 @@ public class DefaultLoggingListener implements TestRunListener {
                 break;
             case MACRO:
                 logUnit("Macro    ", action, message, id, status, variables);
+                break;
+            case CLEANUP:
+                logUnit("Cleanup  ", action, message, id, status, variables);
+                break;
+            case SETUP:
+                logUnit("Setup    ", action, message, id, status, variables);
                 break;
             default:
                 logTechSetupProblem();
@@ -100,6 +114,10 @@ public class DefaultLoggingListener implements TestRunListener {
                 break;
         }
         if (Action.LEAVE.equals(action)) {
+            // don't (try to) pop test leave marker, since stack unrolling is done within a test, not exiting it!
+            if (!SemanticUnit.TEST.equals(unit)) {
+                openLeaveStack.pop();
+            }
             logTechnicalReference(unit, action, message, id);
         }
     }
@@ -154,30 +172,38 @@ public class DefaultLoggingListener implements TestRunListener {
         return ESCAPE_JAVA.translate(message);
     }
 
+    private String buildTechnicalReferenceString(SemanticUnit unit, Action action, String message, String id) {
+        return indentPrefix() + "@" + unit.toString() + ":" + action.toString() + ":"
+                + Integer.toHexString(message.hashCode()) + ":" + id;
+    }
+
     private void logTechnicalReference(SemanticUnit unit, Action action, String message, String id) {
-        logger.trace(indentPrefix() + "@" + unit.toString() + ":" + action.toString() + ":"
-                + Integer.toHexString(message.hashCode()) + ":" + id);
+        logger.trace(buildTechnicalReferenceString(unit, action, message, id));
     }
 
     @Override
     public void reportFixtureExit(FixtureException fixtureException) {
         logger.error(indentPrefix() + "Test failed because of a fixture exception: "
                      + fixtureException.getLocalizedMessage());
-        logger.error(indentPrefix() + "Please contact an administrator.");
         if (fixtureException.getKeyValueStore() != null) {
             for (String variable: fixtureException.getKeyValueStore().keySet()) {
                 logger.error(indentPrefix() + "  with " + escape(variable) + " = \""
                             + escape(fixtureException.getKeyValueStore().get(variable).toString()) + "\"");
             }
         }
+        logger.error(indentPrefix() + "Please contact an administrator.");
         logger.trace("FixtureException", fixtureException);
+        logPendingTechnicalLeaveMessages();
+        currentIndent = INDENT;
     }
-
+    
     @Override
     public void reportExceptionExit(Exception exception) {
         logger.error("Test failed because of an unanticipated exception: " + exception.getLocalizedMessage());
         logger.error("Please contact an administrator.");
         logger.trace("Exception", exception);
+        logPendingTechnicalLeaveMessages();
+        currentIndent = INDENT;
     }
 
     @Override
@@ -185,10 +211,19 @@ public class DefaultLoggingListener implements TestRunListener {
         logger.error(indentPrefix() + "Assertion failed: " + assertionError.getLocalizedMessage());
         logger.error(indentPrefix() + "Please check the expectation and the actual value.");
         logger.trace("AssertionError: " + assertionError.getLocalizedMessage(), assertionError);
+        logPendingTechnicalLeaveMessages();
+        currentIndent = INDENT;
     }
 
     private void logTechSetupProblem() {
         logger.warn("Logging failed because of technical setup problems. Please contact an administrator.");
+    }
+
+    private void logPendingTechnicalLeaveMessages() {
+        while (!openLeaveStack.isEmpty()) {
+            logger.trace(openLeaveStack.peek());
+            openLeaveStack.pop();
+        }
     }
 
 }

@@ -51,6 +51,9 @@ public class AbstractTestCase {
     private Status finalStatus = Status.ERROR;
     
     protected static final Logger logger = LoggerFactory.getLogger(AbstractTestCase.class);
+    
+    // a map of running numbers that are used to provide call tree ids (that are structural stable)
+    private Map<String, Long> runningNumberMap;
 
     /**
      * default constructor
@@ -66,6 +69,7 @@ public class AbstractTestCase {
             });
         }
         runningNumber = 0;
+        runningNumberMap = new HashMap<String, Long>();
 
         initializeCallTreeListener();
 
@@ -91,9 +95,33 @@ public class AbstractTestCase {
         }
     }
 
+    /**
+     * please use nextSubId instead!
+     * @return next unique id, generated during runtime of the test
+     */
+    @Deprecated
     protected String newVarId() {
+        logger.warn("Generated code is using deprecated feature."
+                + " Please upgrade your testeditor language version (generator).");
         runningNumber++;
         return "ID" + Long.toString(runningNumber);
+    }
+    
+    /**
+     * return next sub id of the passed id, generated during runtime of the test
+     * @param id  parent id
+     * @return next unique sub id
+     */
+    protected String nextSubId(String id) {
+        if (runningNumberMap.containsKey(id)) {
+            Long counter = runningNumberMap.get(id);
+            counter++;
+            runningNumberMap.put(id, counter);
+            return id + "-" + counter.toString();
+        } else {
+            runningNumberMap.put(id, Long.valueOf(0));
+            return id + "-0";
+        }
     }
 
     @Before

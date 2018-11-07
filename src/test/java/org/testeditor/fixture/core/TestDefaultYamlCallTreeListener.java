@@ -179,7 +179,9 @@ public class TestDefaultYamlCallTreeListener {
                         "      \"id\": \"4712\"\n" + //
                         "      \"preVariables\":\n" + //
                         "      \"children\":\n" + //
-                        "      \"assertionError\": \"my message\\n\\\"with\"\n");
+                        "      \"assertionError\": \"my message\\n\\\"with\"\n" + //
+                        "      \"status\": \"ERROR\"\n" + //
+                        "      \"postVariables\":\n");
     }
 
     @Test
@@ -206,19 +208,21 @@ public class TestDefaultYamlCallTreeListener {
                         "      \"id\": \"4712\"\n" + //
                         "      \"preVariables\":\n" + //
                         "      \"children\":\n" + //
-                        "      \"exception\": \"my message\\n\\\"with\"\n");
+                        "      \"exception\": \"my message\\n\\\"with\"\n" + //
+                        "      \"status\": \"ERROR\"\n" + //
+                        "      \"postVariables\":\n");
     }
 
     @Test
     public void testYamlOnFixtureException() {
         // given
         Map<String, Object> someMap = new HashMap<>();
-        someMap.put("a map key to long", new Long(42));
+        someMap.put("a map key to long", Long.valueOf(42));
         someMap.put("keyToString", "someString");
 
         Map<String, Object> longMap = new HashMap<>();
-        longMap.put("first", new Long(1));
-        longMap.put("second", new Long(-2));
+        longMap.put("first", Long.valueOf(1));
+        longMap.put("second", Long.valueOf(-2));
         longMap.put("nullKey", null);
 
         Map<String, Object> stringMap = new HashMap<>();
@@ -230,13 +234,13 @@ public class TestDefaultYamlCallTreeListener {
         someArray.add(longMap);
         someArray.add(stringMap);
         someArray.add(Collections.emptyMap());
-        someArray.add(new Long(44));
+        someArray.add(Long.valueOf(44));
         someArray.add("lllaaa");
 
         Map<String, Object> keyValueStore = new HashMap<>();
         keyValueStore.put("a Map", someMap);
         keyValueStore.put("an Array", someArray);
-        keyValueStore.put("an Number", new Long(100));
+        keyValueStore.put("an Number", Long.valueOf(100));
         keyValueStore.put("an String", "some string \"\' that needs escaping");
 
         // when
@@ -262,6 +266,8 @@ public class TestDefaultYamlCallTreeListener {
                         "      \"preVariables\":\n" + //
                         "      \"children\":\n" + //
                         "      \"fixtureException\":\n" + //
+                        "        \"an Number\": 100\n" + //
+                        "        \"fixtureExceptionMessage\": \"message\"\n" + // 
                         "        \"an Array\":\n" + //
                         "          -\n" + //
                         "            \"nullKey\":\n" + //
@@ -274,11 +280,13 @@ public class TestDefaultYamlCallTreeListener {
                         "          -\n" + //
                         "          - 44\n" + //
                         "          - \"lllaaa\"\n" + //
-                        "        \"an String\": \"some string \\\"' that needs escaping\"\n" + //
-                        "        \"an Number\": 100\n" + //
                         "        \"a Map\":\n" + //
                         "          \"keyToString\": \"someString\"\n" + //
-                        "          \"a map key to long\": 42\n");
+                        "          \"a map key to long\": 42\n" + //
+                        "        \"an String\": \"some string \\\"' that needs escaping\"\n" + //
+                        "      \"status\": \"ERROR\"\n" + //
+                        "      \"postVariables\":\n" + //
+                        "");
     }
 
     @Test
@@ -318,6 +326,12 @@ public class TestDefaultYamlCallTreeListener {
                         "          \"id\": \"4714\"\n" + //
                         "          \"preVariables\":\n" + //
                         "          \"children\":\n" + //
+                        "          \"status\": \"UNKNOWN\"\n" + //
+                        "          \"postVariables\":\n" + //
+                        "        \"status\": \"UNKNOWN\"\n" + //
+                        "        \"postVariables\":\n" + //
+                        "      \"status\": \"UNKNOWN\"\n" + //
+                        "      \"postVariables\":\n" + //
                         "    \"status\": \"ABORTED\"\n" + //
                         "    \"postVariables\":\n");
 

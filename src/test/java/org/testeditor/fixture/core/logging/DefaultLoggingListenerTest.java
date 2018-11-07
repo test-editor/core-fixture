@@ -14,9 +14,9 @@
 package org.testeditor.fixture.core.logging;
 
 import static org.hamcrest.CoreMatchers.allOf;
-import static org.hamcrest.core.StringContains.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.StringContains.containsString;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
@@ -171,6 +171,46 @@ public class DefaultLoggingListenerTest extends AbstractMockedLoggingTest {
                    getMessageString(logLines, 0), containsString("detailed message"));
         assertThat("error log entry contains info to contact the administrator", getMessageString(logLines, 1),
                 allOf(containsString("contact"), containsString("administrator")));
+    }
+    
+    @Test
+    public void testNoLoggingOfLeavingTestNodeOnFixtureException() {
+        // given
+        loggingListenerUnderTest.reported(SemanticUnit.TEST, Action.ENTER, "test", "0", Status.STARTED, variables());
+
+        // when
+        loggingListenerUnderTest.reportExceptionExit(new FixtureException("detailed message"));
+
+        // then
+        List<LogEvent> logLines = getLogEventsWithLevel(Level.TRACE);
+        assertThat(logLines.size(), equalTo(2));
+        assertThat(getMessageString(logLines, 0), containsString("ENTER"));
+        assertThat(getMessageString(logLines, 1), containsString("Exception"));
+    }
+
+    @Test
+    public void testLoggingOfLeavingNodesOnFixtureException() {
+        // given
+        loggingListenerUnderTest.reported(SemanticUnit.TEST, Action.ENTER, "test", "0", Status.STARTED, variables());
+        loggingListenerUnderTest.reported(SemanticUnit.SPECIFICATION_STEP, Action.ENTER, "spec", "1", Status.STARTED, 
+                variables());
+        loggingListenerUnderTest.reported(SemanticUnit.COMPONENT, Action.ENTER, "comp", "2", Status.STARTED, 
+                variables());
+
+        // when
+        loggingListenerUnderTest.reportExceptionExit(new FixtureException("detailed message"));
+
+        // then
+        List<LogEvent> logLines = getLogEventsWithLevel(Level.TRACE);
+        assertThat(logLines.size(), equalTo(8));
+        assertThat(getMessageString(logLines, 0), containsString("TEST:ENTER"));
+        assertThat(getMessageString(logLines, 1), containsString("SPECIFICATION_STEP:ENTER"));
+        assertThat(getMessageString(logLines, 2), containsString("->"));
+        assertThat(getMessageString(logLines, 3), containsString("COMPONENT:ENTER"));
+        assertThat(getMessageString(logLines, 4), containsString("->"));
+        assertThat(getMessageString(logLines, 5), containsString("Exception"));
+        assertThat(getMessageString(logLines, 6), containsString("COMPONENT:LEAVE"));
+        assertThat(getMessageString(logLines, 7), containsString("SPECIFICATION_STEP:LEAVE"));
     }
 
 }

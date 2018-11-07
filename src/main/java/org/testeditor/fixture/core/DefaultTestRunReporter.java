@@ -77,7 +77,7 @@ public class DefaultTestRunReporter implements TestRunReporter {
      */
     private void informAllListeners(SemanticUnit unit, Action action, String msg, String id, Status status,
             Map<String, String> variables) {
-        if (action == action.ENTER) {
+        if (action == Action.ENTER) {
             informLogListener(unit, action, msg, id, status, variables);
             informRegisteredListeners(unit, action, msg, id, status, variables);
         } else {
