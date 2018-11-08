@@ -39,6 +39,10 @@ public class DefaultLoggingListener implements TestRunListener {
 
     private static final int INDENT = 2;
 
+    private static final String TEST_FAILED_WITH_EXCEPTION = "Test failed because of an unanticipated exception:";
+    private static final String ASSERTION_FAILED = "Assertion failed:";
+
+
     protected static final Logger logger = LoggerFactory.getLogger(DefaultLoggingListener.class);
     private long start;
     private int currentIndent = 0;
@@ -199,7 +203,15 @@ public class DefaultLoggingListener implements TestRunListener {
     
     @Override
     public void reportExceptionExit(Exception exception) {
-        logger.error("Test failed because of an unanticipated exception: " + exception.getLocalizedMessage());
+        String[] messageLines = exception.getLocalizedMessage().split(System.lineSeparator());
+        if (messageLines.length <= 1) {
+            logger.error(TEST_FAILED_WITH_EXCEPTION + " " + exception.getLocalizedMessage());
+        } else {
+            logger.error(TEST_FAILED_WITH_EXCEPTION);
+            for (String message: messageLines) {
+                logger.error("  " + message);
+            }
+        }
         logger.error("Please contact an administrator.");
         logger.trace("Exception", exception);
         logPendingTechnicalLeaveMessages();
@@ -208,7 +220,15 @@ public class DefaultLoggingListener implements TestRunListener {
 
     @Override
     public void reportAssertionExit(AssertionError assertionError) {
-        logger.error(indentPrefix() + "Assertion failed: " + assertionError.getLocalizedMessage());
+        String[] messageLines = assertionError.getLocalizedMessage().split(System.lineSeparator());
+        if (messageLines.length <= 1) {
+            logger.error(indentPrefix() + ASSERTION_FAILED + " " + assertionError.getLocalizedMessage());
+        } else {
+            logger.error(indentPrefix() + ASSERTION_FAILED);
+            for (String message: messageLines) {
+                logger.error(indentPrefix() + "  " + message);
+            }
+        }
         logger.error(indentPrefix() + "Please check the expectation and the actual value.");
         logger.trace("AssertionError: " + assertionError.getLocalizedMessage(), assertionError);
         logPendingTechnicalLeaveMessages();

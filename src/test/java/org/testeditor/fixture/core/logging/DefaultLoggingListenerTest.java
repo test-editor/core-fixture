@@ -213,4 +213,20 @@ public class DefaultLoggingListenerTest extends AbstractMockedLoggingTest {
         assertThat(getMessageString(logLines, 7), containsString("SPECIFICATION_STEP:LEAVE"));
     }
 
+    @Test
+    public void testMultilineErrorsAreReportedOnSeparateLogLines() {
+        // given
+        loggingListenerUnderTest.reported(SemanticUnit.TEST, Action.ENTER, "test", "0", Status.STARTED, variables());
+
+        // when
+        loggingListenerUnderTest.reportExceptionExit(new FixtureException("detailed\nmulti-line message"));
+
+        // then
+        List<LogEvent> logLines = getLogEventsWithLevel(Level.ERROR);
+        assertThat(logLines.size(), equalTo(4));
+        assertThat(getMessageString(logLines, 0), containsString("Test failed"));
+        assertThat(getMessageString(logLines, 1), containsString("detailed"));
+        assertThat(getMessageString(logLines, 2), containsString("multi-line message"));
+    }
+
 }
