@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.junit.After;
 import org.junit.Before;
@@ -43,6 +44,9 @@ import org.testeditor.fixture.core.TestRunReporter.Status;
  * </pre>
  */
 public class AbstractTestCase {
+    private static final String PARAMETER_INDEX_DELIMITER = "*"; // delimiter should ideally be URL-safe (and '*' is)
+    private static final Pattern TEST_NAME_PATTERN = Pattern.compile("\\[(\\d+)\\]");
+
     // reporter for current test status, register with this reported for addition listeners
     protected final TestRunReporter reporter;
     // a number that is used to generate variables, holding call tree ids (used for enter/leave reporting)
@@ -59,6 +63,17 @@ public class AbstractTestCase {
      * default constructor
      */
     public AbstractTestCase() {
+        this("");
+    }
+    
+    /**
+     * Create a new test with a test name.
+     * This is used for parameterized tests; the test name is appended to the
+     * test run id, so runs with different parameter sets can be distinguished
+     * and identified.
+     * @param testName the name of the test
+     */
+    public AbstractTestCase(String testName) {
         // initialization is done in ctor to allow other ctors to access reporter
         // to allow registration before the first event is reported (ENTER TEST)
         reporter = createTestRunReporter();
@@ -71,11 +86,11 @@ public class AbstractTestCase {
         runningNumber = 0;
         runningNumberMap = new HashMap<String, Long>();
 
-        initializeCallTreeListener();
+        initializeCallTreeListener(testName);
 
     }
 
-    protected void initializeCallTreeListener() {
+    protected void initializeCallTreeListener(String testName) {
         try {
             String yamlFileName = getEnvVar("TE_CALL_TREE_YAML_FILE");
             if (yamlFileName != null) {
@@ -83,6 +98,14 @@ public class AbstractTestCase {
 
                 String testCaseName = getEnvVar("TE_TESTCASENAME");
                 String testRunId = getEnvVar("TE_TESTRUNID");
+                if (testName != null && testName.length() > 0) {
+                    var matcher = TEST_NAME_PATTERN.matcher(testName.trim());
+                    if (matcher.matches()) {
+                        testRunId = testRunId + PARAMETER_INDEX_DELIMITER + matcher.group(1);
+                    } else {
+                        testRunId = testRunId + PARAMETER_INDEX_DELIMITER + testName.trim();
+                    }
+                }
                 String testCommitId = getEnvVar("TE_TESTRUNCOMMITID");
                 
                 reporter.addListener(new DefaultYamlCallTreeListener(new FileOutputStream(yamlFile, true), 
